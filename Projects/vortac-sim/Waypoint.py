@@ -1,6 +1,6 @@
 import time
 class Waypoint:
-    def __init__(self, name: str, x_loc: float, y_loc: float, active: bool):
+    def __init__(self, name: str, x_loc: float, y_loc: float, active: bool = True):
         print('\nWaypoint.__init__() called -->')
         if name is None or len(name) < 3:
             time.sleep(2)
