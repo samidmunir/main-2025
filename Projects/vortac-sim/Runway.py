@@ -1,5 +1,5 @@
 class Runway:
-    def __init__(self, name: str, lenght: float, heading: float, start_x_loc: float, start_y_loc: float, end_x_loc: float, end_y_loc: float, active: bool = True):
+    def __init__(self, name: str, lenght: float, heading: float, start_x_loc: float, start_y_loc: float,        end_x_loc: float, end_y_loc: float, active: bool = True):
         print('\nRunway.__init__() called -->')
         if name is None or len(name) < 2:
             print('***ERROR***: Runway initialization failed')
