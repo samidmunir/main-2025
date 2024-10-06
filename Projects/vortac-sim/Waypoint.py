@@ -6,6 +6,7 @@ class Waypoint:
             time.sleep(2)
             print('***ERROR***: Waypoint initialization failed')
             print('\tInvalid name. Name must be at least 3 characters long.')
+            return
         self.name = name
         self.x_loc = x_loc
         self.y_loc = y_loc
@@ -19,6 +20,7 @@ class Waypoint:
             time.sleep(2)
             print('***ERROR***: Failed to update waypoint name')
             print('\tInvalid name. Name must be at least 3 characters long.')
+            return
         self.name = new_name
         print('\tWaypoint name updated successfully.')
     
@@ -28,6 +30,7 @@ class Waypoint:
             time.sleep(2)
             print('***ERROR***: Failed to update waypoint x-location')
             print('\tInvalid x-location. Location must be a numeric value.')
+            return
         self.x_loc = new_x_loc
         print('\tWaypoint x-location updated successfully.')
     
@@ -37,6 +40,7 @@ class Waypoint:
             time.sleep(2)
             print('***ERROR***: Failed to update waypoint y-location')
             print('\tInvalid y-location. Location must be a numeric value.')
+            return
         self.y_loc = new_y_loc
         print('\tWaypoint y-location updated successfully.')
     

@@ -4,6 +4,7 @@ class Runway:
         if name is None or len(name) < 2:
             print('***ERROR***: Runway initialization failed')
             print('\tInvalid name. Name must be at least 2 characters long.')
+            return
         self.name = name
         self.lenght = lenght
         self.heading = heading
