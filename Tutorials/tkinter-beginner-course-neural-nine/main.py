@@ -44,4 +44,7 @@ button6.grid(row = 1, column = 2, sticky = tk.W + tk.E)
 
 buttonFrame.pack(fill = 'x')
 
+another_button = tk.Button(root, text = 'TEST')
+another_button.place(x = 200, y = 200, height = 100, width = 100)
+
 root.mainloop()
