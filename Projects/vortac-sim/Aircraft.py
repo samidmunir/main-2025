@@ -28,6 +28,9 @@ class Aircraft:
         self.is_active = True
         print(f'\tAircraft initialized successfully [{self.flight_number}]')
     
+    def lerp(start, end, t):
+            return start + t * (end - start)
+    
     def update(self, dt):
         if not self.is_active:
             return # No need to update if the aircraft is inactive.
@@ -61,9 +64,6 @@ class Aircraft:
         # Check if the aircraft is out of bounds (off the canvas).
         if not (0 <= self.x_loc <= CANVAS_WIDTH) and (0 <= self.y_loc <= CANVAS_HEIGHT):
             self.is_active = False # Mark aircraft as inactive from VORTAC canvas.
-        
-        def lerp(start, end, t):
-            return start + t * (end - start)
     
     def add_to_plan(self, target_x, target_y, target_altitude, target_speed, target_heading, duration):
         self.plan.append((target_x, target_y, target_altitude, target_speed, target_heading, duration))
