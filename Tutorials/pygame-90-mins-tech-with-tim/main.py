@@ -3,7 +3,7 @@ import os
 pygame.font.init()
 pygame.mixer.init()
 ######################################################################
-WIDTH, HEIGHT = 900, 500
+WIDTH, HEIGHT = 1200, 800
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 HEALTH_FONT = pygame.font.SysFont('comicsans', 40)
 WINNER_FONT = pygame.font.SysFont('comicsans', 100)
@@ -12,8 +12,8 @@ BULLET_FIRE_SOUND = pygame.mixer.Sound(os.path.join('assets', 'Gun+Silencer.mp3'
 pygame.display.set_caption("Space Invaders")
 FPS = 60
 VELOCITY = 5
-BULLET_VELOCITY = 7
-MAX_BULLETS = 5
+BULLET_VELOCITY = 10
+MAX_BULLETS = 10
 
 # New USEREVENTS for bullet collision detection.
 YELLOW_HIT = pygame.USEREVENT + 1
