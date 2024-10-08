@@ -1,12 +1,12 @@
 class Runway:
-    def __init__(self, name: str, lenght: float, heading: float, start_x_loc: float, start_y_loc: float, end_x_loc: float, end_y_loc: float, active: bool = True):
+    def __init__(self, name: str, length: float, heading: float, start_x_loc: float, start_y_loc: float, end_x_loc: float, end_y_loc: float, active: bool = True):
         print('\nRunway.__init__() called -->')
         if name is None or len(name) < 2:
             print('***ERROR***: Runway initialization failed')
             print('\tInvalid name. Name must be at least 2 characters long.')
             return
         self.name = name
-        self.lenght = lenght
+        self.length = length
         self.heading = heading
         self.start_x_loc = start_x_loc
         self.start_y_loc = start_y_loc
@@ -24,13 +24,13 @@ class Runway:
         self.name = new_name
         print('\tRunway name updated successfully.')
     
-    def update_lenght(self, new_lenght: float):
+    def update_length(self, new_length: float):
         print('\nRunway.update_lenght() called -->')
-        if new_lenght is None or new_lenght <= 0:
+        if new_length is None or new_length <= 0:
             print('***ERROR***: Failed to update runway length')
             print('\tInvalid length. Length must be a positive numeric value.')
             return
-        self.lenght = new_lenght
+        self.lenght = new_length
         print('\tRunway length updated successfully.')
     
     def update_heading(self, new_heading: float):
