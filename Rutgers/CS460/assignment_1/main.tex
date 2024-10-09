@@ -1,0 +1,352 @@
+\documentclass[12pt, letterpaper]{article}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage{fancyvrb}
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{codegreen}{rgb}{0, 0.6, 0}
+\definecolor{codegray}{rgb}{0.5, 0.5, 0.5}
+\definecolor{codepurple}{rgb}{0.58, 0, 0.82}
+\definecolor{backcolor}{rgb}{0.95, 0.95, 0.92}
+
+% Python style code.
+\lstdefinestyle{Pythonstyle} {
+    language=Python,
+    backgroundcolor=\color{backcolor},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\title{Assignment\_1 Report}
+\author{Sami Munir - sm2246}
+\date{September 26, 2024}
+
+\begin{document}
+
+\maketitle
+
+\section{Component I - \textit{Validating Rotations}}
+\subsection{function \textit{check\_SOn()}}
+\subsubsection{Objective}
+\paragraph{This function checks if a given matrix \textit{m} is an element of the special orthogonal group $SO(n)$ within a given \textit{epsilon} tolerance.}
+\subsubsection{Key Conditions}
+\paragraph{Some key conditions to verify that \textit{m} is in $SO(n)$ include the matrix must be a square, the matrix must be orthogonal, and the determinant of the matrix should be close to 1.}
+\subsubsection{Logic \& Code}
+\begin{itemize}
+    \item{Check if the matrix is a square by examining its shape.}
+    \begin{verbatim}
+        if m.shape[0] != m.shape[1]:
+            return False
+    \end{verbatim}
+    \item{Check if the matrix multiplied by its transpose results in the identity matrix.}
+    \begin{verbatim}
+        identity_matrix = np.eye(m.shape[0])
+        orthogonality_check = np.allclose(np.dot(m.T, m), identity_matrix, 
+            atol = epsilon)
+    \end{verbatim}
+    \item{Ensure that the determinant of matrix is close to 1.}
+    \begin{verbatim}
+        determinant_check = np.isclose(np.linalg.det(m), 1.0, 
+            atol = epsilon)
+    \end{verbatim}
+\end{itemize}
+\subsubsection{Important Points}
+\paragraph{This function utilizes \textit{np.allclose()} to compare matrices within a tolerance \textit{epsilon}, allowing for numerical precision errors.}
+\subsection{function \textit{check\_quaternion()}}
+\subsubsection{Objective}
+\paragraph{This function checks if a given vector \textit{v} is a valid unit quaternion within a given \textit{epsilon} tolerance.}
+\subsubsection{Key Conditions}
+\paragraph{Some key conditions to verify that the vector is a valid quaternion include confirming that it is 4-dimensional, and that it must have a magnitude of 1 (within the \textit{epsilon} tolerance), ensuring it lies on the 3-sphere $S^3$.}
+\subsubsection{Logic \& Code}
+\begin{itemize}
+    \item{Magnitude check: It calculates the square of the magnitude of the vector and verifies if it is close to 1 (with \textit{epsilon} tolerance.}
+    \begin{verbatim}
+        if len(v) != 4:
+            return False
+    
+        magnitude_squared = np.sum(np.square(v))
+    
+        return np.abs(magnitude_squared - 1) < epsilon
+    \end{verbatim}
+\end{itemize}
+\subsection{function \textit{check\_SEn()}}
+\subsubsection{Objective}
+\paragraph{This function checks if a given matrix \textit{m} belongs to the special Euclidean group $SE(n)$, which represents rigid body transformations.}
+\subsubsection{Key Conditions}
+\paragraph{Some key conditions to check are that the matrix must be a square with a size of $(n + 1) \times (n + 1)$, where $n = 2$ or $n = 3$. It also essential to check that the top-left $n \times n$ sub-matrix must be an element of $SO(n)$ (i.e. a valid rotation matrix). The last check is to confirm that the last row of \textit{m} should be of the form $[0, 0, ..., 1]$.}
+\subsubsection{Logic \& Code}
+\begin{itemize}
+    \item{Check if the matrix is a square by examining its shape.}
+    \begin{verbatim}
+        n = m.shape[0] - 1
+    
+        if m.shape[0] != m.shape[1] or (n not in [2, 3]):
+            return False
+    \end{verbatim}
+    \item{Rotation check: It extracts the top-left sub-matrix and verifies if it is in $SO(n)$.}
+    \begin{verbatim}
+        rotation_matrix = m[:n, :n]
+    
+        if not check_SOn(rotation_matrix, epsilon):
+            return False
+    \end{verbatim}
+    \item{Last row check: It verifies if the last row is composed of zeros, with a 1 in the last position.}
+    \begin{verbatim}
+        last_row_check = np.allclose(m[n, :], np.append(np.zeros(n), 1), 
+            atol = epsilon)
+    \end{verbatim}
+\end{itemize}
+\subsubsection{Important Points}
+\begin{itemize}
+    \item{$SE(n)$ matrices represent both rotation and translation, where the top-left part is the rotation and the last row encodes translation in homogeneous coordinates.}
+    \item{The use of the \textit{epsilon} parameter allows for flexibility in handling floating-point precision, which is especially important in numerical computations.}
+\end{itemize}
+\paragraph{All functions take an \textit{epsilon} parameter to handle floating-point inaccuracies, making the checks robust against minor numerical errors. These functions are critical in verifying properties like orthogonality, unit determinant, and magnitude, all of which are fundamental in transformations and rotations. The \textit{check\_SEn()} function utilizes \textit{check\_SOn()} as a helper to validate the rotation part of the transformation matrix, demonstrating module-based in design.}
+\section{Component II - \textit{Random Uniform Rotations}}
+\subsection{function \textit{random\_rotation\_matrix()}}
+\subsubsection{Purpose}
+\paragraph{This function generates a random rotation matrix $R in SO(3)$, with the option of using a naive or more sophisticated method based on the \textit{naive} boolean flag.}
+\subsubsection{naive: True Implementation}
+\begin{itemize}
+    \item{Random Euler angles are generated for yaw, pitch, and roll. Each angle corresponds to a rotation around one of the three axes (z, y, and x respectively).}
+    \item{Rotation matrices for yaw, pitch, and roll are created and then multiplied to form the final rotation matrix.}
+    \item{The naive method generates random rotations by first choosing random angles in radians between $0$ and $2\pi$.}
+    \item{The final random rotation matrix is obtained by multiplying the yaw, pitch, and roll matrices: $R_R = R_z \cdot R_y \cdot R_x$}
+\end{itemize}
+\begin{verbatim}
+        yaw = np.random.uniform(0, 2 * np.pi) # rotation around z-axis
+        pitch = np.random.uniform(0, 2 * np.pi) # rotation around y-axis
+        roll = np.random.uniform(0, 2 * np.pi) # rotation around x-axis
+        
+        # Rotation matrix around z-axis (yaw)
+        R_z = np.array([
+            [np.cos(yaw), -np.sin(yaw), 0],
+            [np.sin(yaw), np.cos(yaw), 0],
+            [0, 0, 1]
+        ])
+        
+        # Rotation matrix around y-axis (pitch)
+        R_y = np.array([
+            [np.cos(pitch), 0, np.sin(pitch)],
+            [0, 1, 0],
+            [-np.sin(pitch), 0, np.cos(pitch)]
+        ])
+        
+        # Rotation matrix around x-axis (roll)
+        R_x = np.array([
+            [1, 0, 0],
+            [0, np.cos(roll), -np.sin(roll)],
+            [0, np.sin(roll), np.cos(roll)]
+        ])
+        
+        random_rotation_matrix = np.dot(R_z, np.dot(R_y, R_x))
+
+        return random_rotation_matrix
+\end{verbatim}
+\subsubsection{naive: False Implementation}
+\begin{itemize}
+    \item{Instead of generating Euler angles, the function generates a random quaternion.}
+    \item{A quaternion $(q_0, q_1, q_2, q_3)$ is generated using uniform random values $u_1, u_2, u_3$.}
+    \item{The quaternion is then converted to a rotation matrix using the function \textit{utils.quaternion\_to\_rotation\_matrix()}.}
+    \item{This method generates uniform random rotations by utilizing a more efficient and accurate method based on quaternions, ensuring uniform sampling from $SO(3)$.}
+\end{itemize}
+\begin{verbatim}
+        # Generate a random quaternion
+        u1 = np.random.uniform(0, 1)
+        u2 = np.random.uniform(0, 2 * np.pi)
+        u3 = np.random.uniform(0, 2 * np.pi)
+        
+        # Convert to quaternion (q0, q1, q2, q3)
+        q0 = np.sqrt(1 - u1) * np.cos(u2)
+        q1 = np.sqrt(1 - u1) * np.sin(u2)
+        q2 = np.sqrt(u1) * np.cos(u3)
+        q3 = np.sqrt(u1) * np.sin(u3)
+        
+        # Convert quaternion to a rotation matrix
+        random_rotation_matrix = quaternion_to_rotation_matrix(np.array([q0, q1, q2, q3]))
+\end{verbatim}
+\begin{verbatim}
+def quaternion_to_rotation_matrix(q: np.array) -> np.ndarray:
+    # Qaternion elements
+    q0, q1, q2, q3 = q
+    
+    # Rotation matrix from quaternion
+    rotation_matrix = np.array([
+        [1 - 2 * (q2 ** 2 + q3 ** 2), 2 * (q1 * q2 - q0 * q3), 2 * (q1 * q3 + q0 * q2)],
+        [2 * (q1 * q2 + q0 * q3), 1 - 2 * (q1 ** 2 + q3 ** 2), 2 * (q2 * q3 - q0 * q1)],
+        [2 * (q1 * q3 - q0 * q2), 2 * (q2 * q3 + q0 * q1), 1 - 2 * (q1 ** 2 + q2 ** 2)]
+    ])
+    
+    return rotation_matrix
+\end{verbatim}
+\subsubsection{Validation \& Visualization}
+\begin{itemize}
+    \item{After generating the rotation matrix, the function calls \textit{check\_SOn()} to ensure that the matrix belongs to $SO(3)$. This ensures the result is a valid rotation matrix.}
+    \item{The function also calls \textit{visualize\_rotation()} to visualize the rotation in 3D space. One vector represents, the original, the other represents the translation, and the other represents the rotation.}
+\end{itemize}
+\subsection{function \textit{utils.visualize\_rotation()}}
+\paragraph{This function visualizes the effect of a rotation matrix \textit{m} on vectors in 3D space. Specifically, it shows how the rotation affects two vectors: one at the "north pole" of a unit sphere and another slightly displaced from the pole.}
+\paragraph{Two vectors are defined in 3D space:}
+\begin{itemize}
+    \item{v0: a point on the positive z-axis.}
+    \item{v1: a point slightly displaced from the north pole in the y-direction. This vector is used to visualize how a small perturbation from the north pole moves under rotation.}
+\end{itemize}
+\paragraph{The rotation matrix \textit{m} is applied to both vectors using matrix multiplication.}
+\paragraph{A sphere is created using mesh grids generated by parameterizing the surface of the sphere with angles \textit{u} and \textit{v}. This helps to easily visualize and understand the cause and effect of the rotation matrix \textit{m} on vectors v0 and v1.}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{component-2-fig-i.png}
+    \caption{Random rotation matrix applied on vector (1).}
+    \label{fig:enter-label}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{component-2-fig-ii.png}
+    \caption{Random rotation matrix applied on vector (2).}
+    \label{fig:enter-label}
+\end{figure}
+\section{Component III - \textit{Rigid Body in Motion}}
+\subsection{function \textit{interpolate\_rigid\_body()}}
+\subsubsection{Purpose}
+\paragraph{This function performs linear interpolation between the start pose and the goal pose of the robot. It computes a sequence of poses (position \& orientation) that smoothly transitions from the start to the goal.}
+\subsubsection{Logic \& Code}
+\begin{itemize}
+    \item{The function uses linear interpolation with 100 steps to generate intermediate positions and orientations between the start and goal poses.}
+    \item{The result is a path that consists of 100 poses that smoothly transition from the initial pose to the goal pose.}
+\end{itemize}
+\subsubsection{Important Points}
+\begin{itemize}
+    \item{Linear interpolation works well for simple, direct motion without complex dynamics or changes in velocity.}
+    \item{The \textit{steps} variable is set to 100, giving a fine-grained resolution of the robot's path.}
+\end{itemize}
+\subsection{function \textit{forward\_propagate\_rigid\_body()}}
+\subsubsection{Purpose}
+\paragraph{This function computes the path of the rigid body robot based on a sequence of velocity commands and durations. It simulates the forward propagation of the robot through its environment.}
+\subsubsection{Logic \& Code}
+\begin{itemize}
+    \item{For each velocity and duration in the plan, the function updates the robot's position and orientation over small time steps (assuming 100 updates per second).}
+    \item{The \textit{x} and \textit{y} coordinates are updated based on the velocity in the \textit{x} and \textit{y} directions.}
+    \item{The orientation theta is updated based on the angular velocity $v\theta$.}
+    \item{The poses are continuously updated and appended to the result list, creating a detailed path which can later be visualized using function \textit{visualize\_path()}.}
+\end{itemize}
+\subsubsection{Important Points}
+\begin{itemize}
+    \item{The time step of 0.1 seconds (for 100 Hz) is small enough to ensure smooth and continuous motion of the robot.}
+    \item{The method accounts for velocity, allowing more dynamic motion compared to linear interpolation.}
+    \item{Each pose is computed based on the prior pose, making it a recursive motion simulation.}
+\end{itemize}
+\subsection{function \textit{visualize\_path()}}
+\subsubsection{Purpose}
+\paragraph{This function visualizes the path of the robot in a $20 \times 20$ environment using Maplotlib. It also animates the robot's movement along the path.}
+\subsubsection{Logic \& Code}
+\begin{itemize}
+    \item{The plot is set up with x and y limits from [-10, 10], representing a $20 \times 20$ environment.}
+    \item{The path is visualized as a blue line on the plot, showing the robot's trajectory.}
+    \item{The robot itself is visualized as a red rectangle with dimensions $0.5 \times 0.3$.}
+    \item{The function uses Matplotlib's FuncAnimation to animate the robot's movement along the path. The robot's position and orientation are updated at each frame.}
+    \item{The update() function is called for each frame to change the robot's position and rotation.}
+\end{itemize}
+\subsubsection{Important Points}
+\paragraph{Linear interpolation provides a direct, constant speed path between the start and goal. It is simple and fast but does not account for dynamic changes in velocity.}
+\paragraph{Forward propagation is more flexible and realistic, allowing velocity changes and varying durations, giving a more dynamic and complex trajectory. This method better simulates real-world robot motion where velocity is not constant.}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{component-3-fig-i.png}
+    \caption{Interpolated Path Behavior}
+    \label{fig:enter-label}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{component-3-fig-ii.png}
+    \caption{Forward Propagated Path Behavior}
+    \label{fig:enter-label}
+\end{figure}
+\section{Component IV - \textit{Movement of an Arm}}
+\subsection{function \textit{interpolate\_arm()}}
+\subsubsection{Purpose}
+\paragraph{This function generates a linear interpolation between two configurations of a two-link arm in 2D space. The configurations represent the angles of the two joints of the arm.}
+\subsubsection{Logic \& Code}
+\begin{itemize}
+    \item{The function computes the difference between the start and goal configurations (delta\_theta) to determine how much the angles change.}
+    \item{Based on this change, it computes a set number of steps (proportional to the magnitude of the angle difference) and linearly interpolates between the start and goal angles using \textit{np.linspace()}.}
+    \item{Each step is a new arm configuration that smoothly transitions between the start and goal.}
+\end{itemize}
+\subsubsection{Important Points}
+\paragraph{Linear interpolation ensures a smooth transition between configurations, but it assumes constant motion for both joints. This may not accurately represent real-world robotic arm motion, which can have varying speeds and velocities for different joints.}
+\paragraph{The number of steps is determined based on the angular difference between the start and goal configurations, ensuring that the interpolation adapts to the amount of motion required.}
+\subsection{function \textit{forward\_propagate\_arm()}}
+\subsubsection{Purpose}
+\paragraph{This function simulates the forward propagation of the arm's motion using a set of velocity commands and durations, producing a series of arm configurations.}
+\subsubsection{Logic \& Code}
+\begin{itemize}
+    \item{The function starts with the initial pose and iterates through the velocity plan.}
+    \item{For each velocity and duration, it updates the joint angles proportionally based on the velocity and time.}
+    \item{This method accounts for velocity, allowing the arm to follow a more dynamic and realistic trajectory, where joints can move at different rates and over varying time intervals.}
+\end{itemize}
+\subsubsection{Important Points}
+\begin{itemize}
+    \item{Forward propagation allows for non-uniform joint motion, meaning the robot's joints can move at different speeds and over different time durations, resulting in a more flexible and realistic path.}
+    \item{This method is more accurate in simulating real-world robotics, where joint velocities and durations vary, and the arm's movement is non-linear.}
+    \item{The plan provides flexibility to handle complex movements, such as accelerations and decelerations.}
+\end{itemize}
+\subsection{function \textit{visualize\_arm\_path()}}
+\subsubsection{Purpose}
+\paragraph{This function visualizes the movement of the two-link robotic arm based on the provided path of joint angles. The visualization shows the arm's motion in 2D space, where each link of the arm is represented as a segment connected by joints.}
+\subsubsection{Key Details}
+\begin{itemize}
+    \item{The arm is modeled as two segments: the first link has a length of 2 meters, and the second link has a length of 1.5 meters.}
+    \item{The base of the arm is fixed at the origin (0, 0).}
+    \item{The arm's joint angles are used to compute the positions of the first and second joints (end-effector), and these positions are used to draw the arm.}
+\end{itemize}
+\subsubsection{Logic \& Code}
+\begin{itemize}
+    \item{The \textit{get\_arm\_position()} function calculates the Cartesian coordinates of the arm's joints based on the angles $\theta_0$ and $\theta_1$.}
+    \item{The function sets up an animated plot using Matplotlib, where the arm's position is updated in each frame.}
+    \item{The arm's motion is shown as an animation, with a red line representing the joints and links of the arm. The labels "Base", "Joint 1", and "End Effector" help in identifying the components of the two-link robotic arm system.}
+\end{itemize}
+\subsubsection{Important Points}
+\begin{itemize}
+    \item{The choice of link lengths is important in determining how far the arm can reach and how the joints interact during movement.}
+    \item{The \textit{interval} value can be modified to change the speed of the animation.}
+\end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{component-4-fig-i.png}
+    \caption{Interpolated Path Behavior}
+    \label{fig:enter-label}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{component-4-fig-ii.png}
+    \caption{Forward Propagated Path Behavior}
+    \label{fig:enter-label}
+\end{figure}
+\section{References}
+\begin{enumerate}
+    \item{\url{https://docs.python.org/3/}}
+    \item{Effective Sampling and Distance Metrics for 3D Rigid Body Path Planning - James J. Kuffner}
+    \item{Fast Random Rotation Matrices - James Arvo}
+    \item{Rotations.pdf}
+    \item{Robot Motion.pdf}
+    \item{\url{https://matplotlib.org/stable/index.html}}
+    \item{\url{https://numpy.org/doc/}}
+    \item{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.animation.FuncAnimation.html}}
+    \item{\url{https://youtu.be/bKd2lPjl92c?si=FiLiFEax229kO3xJ}}
+    \item{\url{https://youtu.be/7RgoHTMbp4A?si=89FQe7A0JGRCsHoc}}
+    \item{Quaternions and Rotation Sequences: A Primer with Applications to Orbits, Aerospace and Virtual Reality - J.B. Kuipers}
+\end{enumerate}
+\end{document}
