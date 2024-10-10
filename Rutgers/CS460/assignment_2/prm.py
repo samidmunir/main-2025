@@ -63,3 +63,15 @@ def is_collision_free_path(config1, config2, environment, num_steps = 10):
             return False
         
     return True
+
+# TODO: implement the A* search algorithm to find the shortest path from the start configuration to the goal configuration.
+
+# Reconstruct the path from A* search.
+def reconstruct_path(came_from, current):
+    path = [current]
+    
+    while current in came_from:
+        current = came_from[current]
+        path.append(current)
+    
+    return path[::-1]
