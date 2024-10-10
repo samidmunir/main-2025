@@ -19,3 +19,21 @@ def is_collision_free(config, environment):
             return False
         
         return True
+
+# Genereate N random configurations in the environment.
+def generate_random_configurations(N, environment):
+    configurations = []
+    
+    while (len(configurations) < N):
+        config = [random.uniform(0, 20), random.uniform(0, 20)] # Random (x, y) in 20x20 space.
+        if is_collision_free(config, environment):
+            configurations.append(config)
+    
+    return configurations
+
+# Find k-nearest neighbors using KDTree.
+def find_nearest_neighbors(config, configurations, k):
+    tree = KDTree(configurations)
+    distances, indices = tree.query(config, k)
+    
+    return indices
