@@ -76,7 +76,37 @@ def reconstruct_path(came_from, current):
     
     return path[::-1]
 
-# TODO: Visualize the PRM roadmap and the solution path.
+# Visualize the PRM roadmap and the solution path.
+def visualize_prm(configurations, edges, path, environment):
+    fig, ax = PLT.subplots()
+    
+    # Draw the obstacles.
+    for obstacle in environment:
+        x, y = obstacle['center']
+        width, height = obstacle['width'], obstacle['height']
+        obstacle_rectangle = PLT.Rectangle((x - width / 2, y - height / 2), width, height, color = '#0000ff', alpha = 0.5)
+        ax.add_patch(obstacle_rectangle)
+    
+    # Draw the nodes (configurations).
+    for config in configurations:
+        ax.plot(config[0], config[1], 'bo', markersize = 5)
+    
+    # Draw the edges.
+    for edge in edges:
+        config1 = configurations[edge[0]]
+        config2 = configurations[edge[1]]
+        ax.plot([config1[0], config2[0]], [config1[1], config2[1]], 'k-', alpha = 0.3)
+    
+    # Draw the solution path.
+    for i in range(len(path) - 1):
+        config1 = configurations[path[i]]
+        config2 = configurations[path[i + 1]]
+        ax.plot([config1[0], config2[0]], [config1[1], config2[1]], 'g-', linewidth = 2)
+                
+    ax.set_xlim(0, 20)
+    ax.set_ylim(0, 20)
+    PLT.gca().set_aspect('equal', adjustable = 'box')
+    PLT.show()
 
 # Load the environment from a file.
 def scene_from_file(filename):
