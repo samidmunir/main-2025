@@ -21,3 +21,9 @@ def generate_environment(number_of_obstacles: int) -> list:
 def scene_to_file(environment: list, filename: str):
     with open(filename, 'w') as file:
         json.dump(environment, file)
+
+def scene_from_file(filename: str) -> list:
+    with open(filename, 'r') as file:
+        environment = json.load(file)
+    
+    return environment
