@@ -21,7 +21,7 @@ def is_collision(obstacle, robot):
 
 # Function to visualize the environment and color obstacles based on collision status.
 def visualize_scene(environment, robot, colliding_obstacles):
-    fix, ax = PLT.subplot()
+    fig, ax = PLT.subplots()
     
     # Plot each obstacle, coloring it red if it collides, green otherwise.
     for i, obstacle in enumerate(environment):
@@ -72,3 +72,23 @@ def scene_from_file(filename):
         environment = json.load(file)
     
     return environment
+
+# Main function.
+def main():
+    parser = argparse.ArgumentParser(description = 'Collision Checking for Robots in an Environment.')
+    
+    # Define the required command-line arguments.
+    parser.add_argument('--robot', required = True, choices = ['arm', 'freeBody'], help = 'Type of robot (arm or freeBody).')
+    parser.add_argument('--map', required = True, type = str, help = 'File containing the environment')
+    
+    # Parse arguments.
+    args = parser.parse_args()
+    
+    # Load the environment.
+    environment = scene_from_file(args.map)
+    
+    # Simulate the robot and check for collisions.
+    simulate_robot(environment)
+
+if __name__ == '__main__':
+    main()
