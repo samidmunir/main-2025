@@ -7,5 +7,6 @@
 ## Rutgers
 ### CS105
 ### CS352
+* Project 0
 ### CS460
 * Assignment 1
