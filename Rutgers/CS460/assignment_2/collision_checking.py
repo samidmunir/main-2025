@@ -65,3 +65,10 @@ def simulate_robot(environment):
         
         # Wait for 1 second before spawning the robot in a new random position.
         time.sleep(1)
+        
+# Load the environment from a file.
+def scene_from_file(filename):
+    with open(filename, 'r') as file:
+        environment = json.load(file)
+    
+    return environment
