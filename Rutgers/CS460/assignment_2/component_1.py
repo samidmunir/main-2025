@@ -1,5 +1,6 @@
 import random
 import json
+import matplotlib.pyplot as PLT
 
 def generate_environment(number_of_obstacles: int) -> list:
     ENVIRONMENT = []
@@ -27,3 +28,20 @@ def scene_from_file(filename: str) -> list:
         environment = json.load(file)
     
     return environment
+
+def visualize_scene(environment: list):
+    fig, ax = PLT.subplots()
+    
+    # Plot each obstacle.
+    for obstacle in environment:
+        x, y = obstacle['center']
+        width, height = obstacle['width'], obstacle['height']
+        obstacle_rectangle = PLT.Rectangle((x - width / 2, y - height / 2), width, height, color = '#0000ff', alpha = 0.5)
+        ax.add_patch(obstacle_rectangle)
+    
+    # Set limits for the 20x20 environment.
+    ax.set_xlim(0, 20)
+    ax.set_ylim(0, 20)
+    
+    PLT.gca().set_aspect('equal', ajustable = 'box')
+    PLT.show()
