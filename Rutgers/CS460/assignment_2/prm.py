@@ -75,3 +75,12 @@ def reconstruct_path(came_from, current):
         path.append(current)
     
     return path[::-1]
+
+# TODO: Visualize the PRM roadmap and the solution path.
+
+# Load the environment from a file.
+def scene_from_file(filename):
+    with open(filename, 'r') as file:
+        environment = json.load(file)
+    
+    return environment
