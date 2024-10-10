@@ -37,3 +37,29 @@ def find_nearest_neighbors(config, configurations, k):
     distances, indices = tree.query(config, k)
     
     return indices
+
+# Build the PRM roadmap.
+def build_prm(N, k, environment):
+    configurations = generate_random_configurations(N, environment)
+    edges = []
+    
+    # Connect each node to its k-nearest neighbors.
+    for i, config in enumerate(configurations):
+        neighbors = find_nearest_neighbors(config, configurations, k)
+        for neighbor in neighbors:
+            # Connect config to its neighbor if the edge is collision-free.
+            if neighbor != i and is_collision_free_path(configurations[neighbor], environment):
+                edges.append((i, neighbor))
+                
+    return configurations, edges
+
+# Check if the path between two configurations is collision-free.
+def is_collision_free_path(config1, config2, environment, num_steps = 10):
+    # Linearly interpolate between the two configurations.
+    for step in NP.linspace(0, 1, num_steps):
+        intermediate = (1 - step) * NP.array(config1) + step * NP.array(config2)
+        
+        if not is_collision_free(intermediate, environment):
+            return False
+        
+    return True
