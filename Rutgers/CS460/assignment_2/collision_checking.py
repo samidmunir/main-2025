@@ -43,3 +43,25 @@ def visualize_scene(environment, robot, colliding_obstacles):
     
     PLT.gca().set_aspect('equal', adjustable = 'box')
     PLT.show()
+    
+# Function to simulate the robot moving through the environment and checking for collisions.
+def simulate_robot(environment):
+    robot_size = {'width': 0.5, 'height': 0.3}
+    
+    for _ in range(10): # run for 10 seconds.
+        # Randomly place the robot in the environment.
+        rx = random.uniform(0, 20)
+        ry = random.uniform(0, 20)
+        robot = {'center': (rx, ry), 'width': robot_size['width'], 'height': robot_size['height']}
+        
+        # Check for collisions with each obstacle.
+        colliding_obstacles = []
+        for i, obstacle in enumerate(environment):
+            if is_collision(obstacle, robot):
+                colliding_obstacles.append(i)
+        
+        # Visualize the environment with colored obstacles based on collisoin status.
+        visualize_scene(environment, robot, colliding_obstacles)
+        
+        # Wait for 1 second before spawning the robot in a new random position.
+        time.sleep(1)
