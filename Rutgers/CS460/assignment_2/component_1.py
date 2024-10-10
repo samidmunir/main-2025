@@ -43,5 +43,5 @@ def visualize_scene(environment: list):
     ax.set_xlim(0, 20)
     ax.set_ylim(0, 20)
     
-    PLT.gca().set_aspect('equal', ajustable = 'box')
+    PLT.gca().set_aspect('equal', adjustable = 'box')
     PLT.show()
