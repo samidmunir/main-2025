@@ -18,3 +18,28 @@ def is_collision(obstacle, robot):
     if (abs(x1 - x2) * 2 < (w1 + w2)) and (abs(y1 - y2) * 2 < (h1 + h2)):
         return True
     return False
+
+# Function to visualize the environment and color obstacles based on collision status.
+def visualize_scene(environment, robot, colliding_obstacles):
+    fix, ax = PLT.subplot()
+    
+    # Plot each obstacle, coloring it red if it collides, green otherwise.
+    for i, obstacle in enumerate(environment):
+        x, y = obstacle['center']
+        width, height = obstacle['width'], obstacle['height']
+        color = '#ff0000' if i in colliding_obstacles else '#00ff00'
+        obstacle_rectangle = PLT.Rectangle((x - width / 2, y - height / 2), width, height, color = color, alpha = 0.5)
+        ax.add_patch(obstacle_rectangle)
+    
+    # Plot the robot.
+    rx, ry = robot['center']
+    rwidth, rheight = robot['width'], robot['height']
+    robot_rectangle = PLT.Rectangle((rx - rwidth / 2, ry - rheight / 2), rwidth, rheight, color = '#0000ff', alpha = 0.7)
+    ax.add_patch(robot_rectangle)
+    
+    # Set limits for the 20x20 environment.
+    ax.set_xlim(0, 20)
+    ax.set_ylim(0, 20)
+    
+    PLT.gca().set_aspect('equal', adjustable = 'box')
+    PLT.show()
