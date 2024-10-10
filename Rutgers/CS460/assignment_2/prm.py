@@ -64,7 +64,37 @@ def is_collision_free_path(config1, config2, environment, num_steps = 10):
         
     return True
 
-# TODO: implement the A* search algorithm to find the shortest path from the start configuration to the goal configuration.
+# A* search algorithm to find the shortest path from the start configuration to the goal configuration.
+def astar_search(start_idx, goal_idx, configurations, edges):
+    def heuristic(config1, config2):
+        return NP.linalg.norm(NP.array(config1) - NP.array(config2))
+     
+    # Priority queue for A*.
+    open_set = [(0, start_idx)]
+    heapq.heapify(open_set)
+    
+    came_from = {}
+    g_score = {i: float('inf') for i in range(len(configurations))}
+    g_score[start_idx] = 0
+    
+    f_score = {i: float('inf') for i in range(len(configurations))}
+    f_score[start_idx] = heuristic(configurations[start_idx], configurations[goal_idx])
+    
+    while open_set:
+        _, current = heapq.heappop(open_set)
+        
+        if current == goal_idx:
+            return reconstruct_path(came_from, current)
+
+        for neighbor in [edge[1] for edge in edges if edge[0] == current] + [edge[0] for edge in edges if edge[1] == current]:
+            tentative_g_score = g_score[current] + heuristic(configurations[current], configurations[neighbor])
+            if tentative_g_score < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = tentative_g_score + heuristic(configurations[neighbor], configurations[goal_idx])
+                heapq.heappush(open_set, (f_score[neighbor], neighbor))
+    
+    return [] # Return an empty path if no solution found.
 
 # Reconstruct the path from A* search.
 def reconstruct_path(came_from, current):
