@@ -4,6 +4,7 @@
 ## Tutorials
 ### tkinter Beginner Course: Python GUI Development - __NeuralNine__
 ### pygame in 90 minutes - ___Tech With Tim__
+### python FastAPI tutorial - __Tech With Tim__
 ## Rutgers
 ### CS105
 ### CS352
