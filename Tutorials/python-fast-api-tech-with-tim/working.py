@@ -3,7 +3,7 @@
     - FastAPI automatically parses JSON data to internal Python types.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Path
 
 # API initialization using FastAPI.
 app = FastAPI()
@@ -36,3 +36,17 @@ def get_items():
 @app.get('/get-item/{item_id}')
 def get_item(item_id: int):
     return inventory[item_id]
+
+"""
+@app.get('/get-item/{item_id}')
+def get_item(item_id: int = Path(None, description = 'The ID of the item you would like to view.')):
+    return inventory[item_id]
+"""
+
+# Query parameters.
+@app.get('/get-by-name')
+def get_item(name: str):
+    for item_id in inventory:
+        if inventory[item_id]['name'] == name:
+            return inventory[item_id]
+    return {'Data': 'Not found'}
