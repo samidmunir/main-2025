@@ -4,23 +4,19 @@
 """
 
 from fastapi import FastAPI, Path
+from typing import Optional
+from pydantic import BaseModel
 
 # API initialization using FastAPI.
 app = FastAPI()
 
+class Item(BaseModel):
+    name: str
+    price: float
+    brand: Optional[str] = None
+
 # Using a grocery store's inventory as an example.
-inventory = {
-    1: {
-        'name': 'Milk',
-        'price': 3.99,
-        'brand': 'Kirkland'
-    },
-    2: {
-        'name': 'Bread',
-        'price': 2.49,
-        'brand': 'Hearty Buns'
-    }
-}
+inventory = {}
 
 # Default endpoint for the API.
 @app.get('/')
@@ -43,10 +39,20 @@ def get_item(item_id: int = Path(None, description = 'The ID of the item you wou
     return inventory[item_id]
 """
 
-# Query parameters.
+# Endpoint for getting a specifc item from the inventory using its name.
+# - If you set a query parameter = None, then it will automatically be optional.
 @app.get('/get-by-name')
-def get_item(name: str):
+def get_item(name: Optional[str] = None):
     for item_id in inventory:
-        if inventory[item_id]['name'] == name:
+        if inventory[item_id].name == name:
             return inventory[item_id]
     return {'Data': 'Not found'}
+
+# Endpoint for creating a new item in the inventory.
+@app.post('/create-item/{item_id}')
+def create_item(item_id: int, item: Item):
+    if item_id in inventory:
+        return {'Error': 'Item ID already exists.'}
+    # inventory[item_id] = {'name': item.name, 'price': item.price, 'brand': item.brand}
+    inventory[item_id] = item
+    return inventory[item_id]
