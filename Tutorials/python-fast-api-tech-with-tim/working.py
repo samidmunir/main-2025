@@ -33,3 +33,6 @@ def get_items():
     return inventory
 
 # Endpoint for getting a specific item from the inventory using its ID.
+@app.get('/get-item/{item_id}')
+def get_item(item_id: int):
+    return inventory[item_id]
