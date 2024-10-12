@@ -91,3 +91,75 @@ def is_collision_free_path(config1, config2, environment, num_steps=10):
         if not is_collision_free(intermediate, environment):
             return False
     return True
+
+# Reconstruct the path from the start to the goal
+def reconstruct_path(tree, goal_idx):
+    path = []
+    current_idx = goal_idx
+    while current_idx is not None:
+        path.append(tree[current_idx]['config'])
+        current_idx = tree[current_idx]['parent']
+    return path[::-1]
+
+# Visualize the RRT* and the solution path
+def visualize_rrt_star(tree, path, environment):
+    fig, ax = PLT.subplots()
+
+    # Draw obstacles
+    for obstacle in environment:
+        x, y = obstacle['center']
+        width, height = obstacle['width'], obstacle['height']
+        rect = PLT.Rectangle((x - width / 2, y - height / 2), width, height, color='red', alpha=0.5)
+        ax.add_patch(rect)
+
+    # Draw the tree
+    for node in tree:
+        if node['parent'] is not None:
+            parent_node = tree[node['parent']]
+            ax.plot([node['config'][0], parent_node['config'][0]], [node['config'][1], parent_node['config'][1]], 'k-', alpha=0.5)
+
+    # Draw the solution path
+    if path:
+        path = NP.array(path)
+        ax.plot(path[:, 0], path[:, 1], 'g-', linewidth=2)
+
+    ax.set_xlim(0, 20)
+    ax.set_ylim(0, 20)
+    PLT.gca().set_aspect('equal', adjustable='box')
+    PLT.show()
+
+# Load the environment from a file
+def scene_from_file(filename):
+    with open(filename, 'r') as file:
+        environment = json.load(file)
+    return environment
+
+# Main function
+def main():
+    parser = argparse.ArgumentParser(description='PRM*/RRT* Path Planning')
+    
+    # Define the required command-line arguments
+    parser.add_argument('--robot', required = True, choices = ['arm', 'freeBody'], help = 'Type of robot (arm or freeBody)')
+    parser.add_argument('--start', required = True, nargs = '+', type = float, help = 'Start configuration')
+    parser.add_argument('--goal', required = True, nargs = '+', type = float, help = 'Goal configuration')
+    parser.add_argument('--goal_rad', required = True, type = float, help = 'Goal radius')
+    parser.add_argument('--map', required = True, type = str, help = 'File containing the environment')
+
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Load the environment
+    environment = scene_from_file(args.map)
+
+    # Perform RRT*
+    tree, goal_idx = rrt_star(args.start, args.goal, args.goal_rad, environment)
+
+    # If a path is found, reconstruct and visualize it
+    if goal_idx is not None:
+        path = reconstruct_path(tree, goal_idx)
+        visualize_rrt_star(tree, path, environment)
+    else:
+        print("No path found to the goal.")
+
+if __name__ == '__main__':
+    main()
