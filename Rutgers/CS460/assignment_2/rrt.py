@@ -62,3 +62,12 @@ def rrt(start, goal, goal_radius, environment, max_iters = 1000, step_size = 0.5
                 return tree, new_node_idx
     # Return the tree if goal not reached within max_iters.
     return tree, None
+
+# Function to reconstruct the path from the start to the goal.
+def reconstruct_path(tree, goal_idx):
+    path = []
+    current_idx = goal_idx
+    while current_idx is not None:
+        path.append(tree[current_idx]['config'])
+        current_idx = tree[current_idx]['parent']
+    return path[::-1] # reverse the path to get the start to goal.
