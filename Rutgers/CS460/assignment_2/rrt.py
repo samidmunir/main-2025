@@ -39,3 +39,26 @@ def extend_tree(tree, sampled_config, step_size, environment):
         tree.append(new_node)
         return len(tree) - 1 # return index of the new node.
     return None
+
+# RRT algorithm.
+def rrt(start, goal, goal_radius, environment, max_iters = 1000, step_size = 0.5, goal_bias = 0.05):
+    tree = [{'config': start, 'parent': None}]
+    
+    for _ in range(max_iters):
+        # Randomly sample a new configuration.
+        if random.random() < goal_bias:
+            sampled_config = goal # goal bias
+        else:
+            sampled_config = [random.uniform(0, 20), random.uniform(0, 20)]
+        
+        # Extend the tree towards the sampled configuration.
+        new_node_idx = extend_tree(tree, sampled_config, step_size, environment)
+        
+        # Check if the new node is within the goal radius.
+        if new_node_idx is not None:
+            new_node_config = tree[new_node_idx]['config']
+            if NP.linalg.norm(NP.array(new_node_config) - NP.array(goal)) <= goal_radius:
+                # reached the goal.
+                return tree, new_node_idx
+    # Return the tree if goal not reached within max_iters.
+    return tree, None
