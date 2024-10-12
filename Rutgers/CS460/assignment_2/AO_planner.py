@@ -102,7 +102,7 @@ def reconstruct_path(tree, goal_idx):
     return path[::-1]
 
 # Visualize the RRT* and the solution path
-def visualize_rrt_star(tree, path, environment):
+def visualize_rrt_star(tree, path, environment, start, goal):
     fig, ax = PLT.subplots()
 
     # Draw obstacles
@@ -122,6 +122,11 @@ def visualize_rrt_star(tree, path, environment):
     if path:
         path = NP.array(path)
         ax.plot(path[:, 0], path[:, 1], 'g-', linewidth=2)
+    
+    # Highlight the start configuration
+    ax.scatter(start[0], start[1], color='blue', s=100, label="Start", zorder=5)
+    # Highlight the goal configuration
+    ax.scatter(goal[0], goal[1], color='orange', s=100, label="Goal", zorder=5)
 
     ax.set_xlim(0, 20)
     ax.set_ylim(0, 20)
@@ -157,7 +162,7 @@ def main():
     # If a path is found, reconstruct and visualize it
     if goal_idx is not None:
         path = reconstruct_path(tree, goal_idx)
-        visualize_rrt_star(tree, path, environment)
+        visualize_rrt_star(tree, path, environment, args.start, args.goal)
     else:
         print("No path found to the goal.")
 
