@@ -280,7 +280,7 @@ def main():
     environment = scene_from_file(args.map)
     
     # Generate the PRM roadmap.
-    N = 500 # number of nodes
+    N = 5000 # number of nodes
     k = 6 # number of nearest neighbors
     configurations, edges = build_prm(N, k, environment)
     
