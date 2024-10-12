@@ -9,12 +9,24 @@ def generate_environment(number_of_obstacles: int) -> list:
         width = random.uniform(0.5, 2.0)
         height = random.uniform(0.5, 2.0)
         
+        # Random rotation (pose) for the obstacle.
+        rotation = random.uniform(0, 350)
+        
         # Random center position within the 20x20 environment.
         x = random.uniform(0, 20)
         y = random.uniform(0, 20)
         
-        # Store obstacle as a dictionary or tuple (center_x, center_y, width, height).
-        obstacle = {'center': (x, y), 'width': width, 'height': height}
+        # Store obstacle as a dictionary or tuple ((center_x, center_y), width, height, rotation).
+        obstacle = {
+            'center': (x, y),
+            'width': width,
+            'height': height,
+            'rotation': rotation
+        }
+        print(f'\tGenerated obstacle:')
+        print(f'\t\tcenter[{obstacle['center'][0]}, {obstacle['center'][1]}]')
+        print(f'\t\twidth: {obstacle["width"]}, height: {obstacle["height"]}]')
+        print(f'\t\trotation: {obstacle["rotation"]} degrees\n')
         ENVIRONMENT.append(obstacle)
     
     return ENVIRONMENT
@@ -36,7 +48,10 @@ def visualize_scene(environment: list):
     for obstacle in environment:
         x, y = obstacle['center']
         width, height = obstacle['width'], obstacle['height']
-        obstacle_rectangle = PLT.Rectangle((x - width / 2, y - height / 2), width, height, color = '#0000ff', alpha = 0.5)
+        rotation = obstacle['rotation']
+        
+        # Create a rectangle to represent the obstacle.
+        obstacle_rectangle = PLT.Rectangle((x - width / 2, y - height / 2), width, height, angle = rotation, color = '#0000ff', alpha = 0.5)
         ax.add_patch(obstacle_rectangle)
     
     # Set limits for the 20x20 environment.

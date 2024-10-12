@@ -8,12 +8,16 @@ def test_component_i():
 
 def main():
     print('Running the main function...')
+    
+    time.sleep(1)
+    print('\n\tTesting component_1 -->')
+    
     # Testing component_i
     test_component_i()
     
-    # Testing component_ii
+    # Testing component_ii (own implementation)
     
-    # Testing component_iii
+    # Testing component_iii (own implementation)
     time.sleep(1)
     print('All tests passed!')
 
