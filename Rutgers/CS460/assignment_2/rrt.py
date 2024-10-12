@@ -20,3 +20,22 @@ def nearest_node(tree, sampled_config):
     distances = NP.linalg.norm(nodes - NP.array(sampled_config), axis = 1)
     nearest_idx = NP.argmin(distances)
     return nearest_idx
+
+# Function to extend the tree towards a sampled configuration.
+def extend_tree(tree, sampled_config, step_size, environment):
+    nearest_idx = nearest_node(tree, sampled_config)
+    nearest_config = tree[nearest_idx]['config']
+    
+    # Compute direction and step toward the sampled config.
+    direction = NP.array(sampled_config) - NP.array(nearest_config)
+    length = NP.linalg.norm(direction)
+    direction = direction / length # normalize direction
+    
+    # Step towards the sampled configuration.
+    new_config = NP.array(nearest_config) + direction * min(step_size, length)
+    
+    if is_collision_free(new_config, environment):
+        new_node = {'config': new_config, 'parent': nearest_idx}
+        tree.append(new_node)
+        return len(tree) - 1 # return index of the new node.
+    return None
