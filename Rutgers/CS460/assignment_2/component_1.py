@@ -58,5 +58,9 @@ def visualize_scene(environment: list):
     ax.set_xlim(0, 20)
     ax.set_ylim(0, 20)
     
+    # Display the number of obstacles as the title of the plot.
+    number_of_obstacles = len(environment)
+    PLT.title(f'Random Environment with {number_of_obstacles} obstacles')
+    
     PLT.gca().set_aspect('equal', adjustable = 'box')
     PLT.show()
