@@ -39,3 +39,10 @@ def extend_tree(tree, sampled_config, step_size, environment):
         tree.append(new_node)
         return len(tree) - 1  # Return index of the new node
     return None
+
+# Function to find nearby nodes for rewiring
+def find_nearby_nodes(tree, new_node_config, radius):
+    nodes = NP.array([node['config'] for node in tree])
+    distances = NP.linalg.norm(nodes - NP.array(new_node_config), axis=1)
+    nearby_indices = NP.where(distances < radius)[0]
+    return nearby_indices
