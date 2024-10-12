@@ -71,3 +71,30 @@ def reconstruct_path(tree, goal_idx):
         path.append(tree[current_idx]['config'])
         current_idx = tree[current_idx]['parent']
     return path[::-1] # reverse the path to get the start to goal.
+
+# Function to visualize the RRT path and the solution path.
+def visualize_rrt(tree, path, environment):
+    fig, ax = PLT.subplots()
+    
+    # Draw obstacles.
+    for obstacles in environment:
+        x, y = obstacles['center']
+        width, height = obstacles['width'], obstacles['height']
+        obstacle_rectangle = PLT.Rectangle((x - width / 2, y - height / 2), width, height, color = 'black', alpha = 0.5)
+        ax.add_patch(obstacle_rectangle)
+    
+    # Draw the tree.
+    for node in tree:
+        if node['parent'] is not None:
+            parent_node = tree[node['parent']]
+            ax.plot([node['config'][0], parent_node['config'][0]], [node['config'][1], parent_node['config'][1]], 'k-', alpha = 0.5)
+    
+    # Draw the solution path.
+    if path:
+        path = NP.array(path)
+        ax.plot(path[:, 0], path[:, 1], 'g-', linewidth = 2)
+    
+    ax.set_xlim(0, 20)
+    ax.set_ylim(0, 20)
+    PLT.gca.set_aspect('equal', adjustable = 'box')
+    PLT.show()
