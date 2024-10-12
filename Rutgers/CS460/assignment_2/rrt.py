@@ -96,5 +96,41 @@ def visualize_rrt(tree, path, environment):
     
     ax.set_xlim(0, 20)
     ax.set_ylim(0, 20)
-    PLT.gca.set_aspect('equal', adjustable = 'box')
+    PLT.gca().set_aspect('equal', adjustable = 'box')
     PLT.show()
+    
+# Function to load the environment from a file.
+def scene_from_file(filename):
+    with open(filename, 'r') as file:
+        environment = json.load(file)
+    return environment
+
+# Main function
+def main():
+    parser = argparse.ArgumentParser(description='RRT Path Planning')
+    
+    # Define the required command-line arguments
+    parser.add_argument('--robot', required = True, choices = ['arm', 'freeBody'], help = 'Type of robot (arm or freeBody)')
+    parser.add_argument('--start', required = True, nargs = '+', type = float, help = 'Start configuration')
+    parser.add_argument('--goal', required = True, nargs = '+', type = float, help = 'Goal configuration')
+    parser.add_argument('--goal_rad', required = True, type = float, help = 'Goal radius')
+    parser.add_argument('--map', required = True, type = str, help = 'File containing the environment')
+
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Load the environment
+    environment = scene_from_file(args.map)
+
+    # Perform RRT
+    tree, goal_idx = rrt(args.start, args.goal, args.goal_rad, environment)
+
+    # If a path is found, reconstruct and visualize it
+    if goal_idx is not None:
+        path = reconstruct_path(tree, goal_idx)
+        visualize_rrt(tree, path, environment)
+    else:
+        print("No path found to the goal.")
+
+if __name__ == '__main__':
+    main()
