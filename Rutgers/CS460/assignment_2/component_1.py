@@ -47,3 +47,26 @@ def scene_to_file(ENVIRONMENT, filename: str):
             file.wirte(f'{x} {y} {w} {h} {orientation}\n')
     
     print(f'Environment saved to {filename}')
+    
+def scene_from_file(filename: str):
+    ENVIRONMENT = {'obstacles': []}
+    
+    with open(filename, 'r') as file:
+        # Read the first line to get the environment width and height.
+        width, height = map(float, file.readline().split())
+        ENVIRONMENT['width'] = width
+        ENVIRONMENT['height'] = height
+        
+        # Read the rest of the lines for each obstacle.
+        for line in file:
+            x, y, w, h, orientation = map(float, line.split())
+            OBSTACLE = {
+                'center': (x, y),
+                'width': w,
+                'height': h,
+                'orientation': orientation
+            }
+            
+            ENVIRONMENT['obstacles'].append(OBSTACLE)
+    
+    return ENVIRONMENT
