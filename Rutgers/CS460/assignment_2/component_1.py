@@ -44,7 +44,7 @@ def scene_to_file(ENVIRONMENT, filename: str):
             w = OBSTACLE['width']
             h = OBSTACLE['height']
             orientation = OBSTACLE['orientation']
-            file.wirte(f'{x} {y} {w} {h} {orientation}\n')
+            file.write(f'{x} {y} {w} {h} {orientation}\n')
     
     print(f'Environment saved to {filename}')
     
@@ -70,3 +70,32 @@ def scene_from_file(filename: str):
             ENVIRONMENT['obstacles'].append(OBSTACLE)
     
     return ENVIRONMENT
+
+import matplotlib.pyplot as PLT
+import matplotlib.patches as PTCHS
+def visualize_scene(ENVIRONMENT):
+    # Create a plot with the environment size.
+    fig, ax = PLT.subplots()
+    ax.set_xlim(0, ENVIRONMENT['width'])
+    ax.set_ylim(0, ENVIRONMENT['height'])
+    
+    # Loop through each obstacle and draw it on the plot.
+    for OBSTACLE in ENVIRONMENT['obstacles']:
+        x, y = OBSTACLE['center']
+        w, h = OBSTACLE['width'], OBSTACLE['height']
+        orientation = OBSTACLE['orientation']
+        
+        # Create a rectangle patch for the obstacle.
+        obstacle_rectangle = PTCHS.Rectangle((x - w / 2, y - h / 2), w, h, angle = orientation, linewidth = 1, edgecolor = 'r', facecolor = 'r', rotation_point = 'center')
+        
+        # Add the patch to the plot.
+        ax.add_patch(obstacle_rectangle)
+    
+    # Set the aspect ratio of the plot to be equal.
+    ax.set_aspect('equal')
+    
+    # Set the title of the plot.
+    ax.set_title(f'Environment with {len(ENVIRONMENT['obstacles'])} obstacles')
+    
+    # Display the plot.
+    PLT.show()
