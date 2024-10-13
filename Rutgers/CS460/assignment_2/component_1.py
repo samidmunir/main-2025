@@ -32,3 +32,18 @@ def generate_environment(number_of_obstacles: int):
         ENVIRONMENT['obstacles'].append(OBSTACLE)
     
     return ENVIRONMENT
+
+def scene_to_file(ENVIRONMENT, filename: str):
+    with open(filename, 'w') as file:
+        # Write the environment width and height first.
+        file.write(f'{ENVIRONMENT['width']} {ENVIRONMENT['height']}\n')
+        
+        # Write each obstacle's center (x, y), width, height, and orientation.
+        for OBSTACLE in ENVIRONMENT['obstacles']:
+            x, y = OBSTACLE['center']
+            w = OBSTACLE['width']
+            h = OBSTACLE['height']
+            orientation = OBSTACLE['orientation']
+            file.wirte(f'{x} {y} {w} {h} {orientation}\n')
+    
+    print(f'Environment saved to {filename}')
