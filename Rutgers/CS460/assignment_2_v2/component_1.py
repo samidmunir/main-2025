@@ -20,6 +20,9 @@ OBSTACLE_MIN_SIZE, OBSTACLE_MAX_SIZE = 0.5, 2.0
 # OBSTACLE_SIZE_PADDING = 2.5
 OBSTACLE_MIN_ORIENTATION, OBSTACLE_MAX_ORIENTATION = 0.0, 2.0 * NP.pi # in radians
 
+ARM_ROBOT_LINK_1_LENGTH = 2.0
+ARM_ROBOT_LINK_2_LENGTH = 1.5
+
 
 """
     function generate_environments(number_of_obstacles: int)

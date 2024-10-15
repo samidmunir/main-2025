@@ -1,7 +1,9 @@
 """
     Assignment #2
     1. Generating environments
+        - component_1.py
     2. Nearest neighbors with linear search approach
+        - nearest_neighbors.py
     3. Collision checking
     4. PRM
     5. RRT
@@ -12,9 +14,11 @@
     1. Generating environments
         - Main script will handle creating a component_1.py object and using its functions to generate environments and save them to respective files.
     2. Nearest neighbors with linear search approach
+        
         python3 nearest_neighbors.py --robot arm --target 0.0 0.0 -k 3 --configs configs.txt
         
         python3 nearest_neighbors.py --robot freeBody --target 10.0 10.0 360.0 -k 3 --configs configs.txt --save_nearest_neighbors
+    
     3. Collision checking
     4. PRM
     5. RRT
