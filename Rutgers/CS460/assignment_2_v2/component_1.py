@@ -48,3 +48,17 @@ def scene_to_file(environment: list, filename: str):
         for OBSTACLE in environment:
             x, y, width, height, orientation = OBSTACLE
             FILE.write(f'{x}, {y}, {width}, {height}, {orientation}\n')
+            
+"""
+    function scene_from_file(filename: str) -> list
+"""
+def scene_from_file(filename: str) -> list:
+    OBSTACLES = []
+    
+    with open(filename, 'r') as FILE:
+        for LINE in FILE:
+            x, y, width, height, orientation = map(float, LINE.strip().split(','))
+            OBSTACLE = (x, y, width, height, orientation)
+            OBSTACLES.append(OBSTACLE)
+    
+    return OBSTACLES
