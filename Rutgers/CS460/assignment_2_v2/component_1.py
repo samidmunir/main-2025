@@ -62,3 +62,20 @@ def scene_from_file(filename: str) -> list:
             OBSTACLES.append(OBSTACLE)
     
     return OBSTACLES
+
+"""
+    function visualize_scene(environment: list)
+"""
+def visualize_scene(environment: list):
+    FIGURE, AXES = PLT.subplots()
+    
+    for OBSTACLE in environment:
+        x, y, width, height, orientation = OBSTACLE
+        OBSTACLE_RECTANGLE = PTCHS.Rectangle((x, y), width, height, angle = NP.rad2deg(orientation), color = '#ff0000', edgecolor = '#ff0000', alpha = 0.5)
+        AXES.add_patch(OBSTACLE_RECTANGLE)
+    
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
+    AXES.set_ylim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
+    
+    PLT.show()
