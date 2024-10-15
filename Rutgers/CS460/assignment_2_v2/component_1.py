@@ -39,3 +39,12 @@ def generate_environment(number_of_obstacles: int):
         OBSTACLES.append(OBSTACLE)
     
     return OBSTACLES
+
+"""
+    function scene_to_file(environment: list, filename: str)
+"""
+def scene_to_file(environment: list, filename: str):
+    with open(filename, 'w') as FILE:
+        for OBSTACLE in environment:
+            x, y, width, height, orientation = OBSTACLE
+            FILE.write(f'{x}, {y}, {width}, {height}, {orientation}\n')
