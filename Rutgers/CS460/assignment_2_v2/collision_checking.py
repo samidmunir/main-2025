@@ -14,13 +14,32 @@ from component_1 import (
 
 """
     function is_line_intersecting():
-    # TODO: Check if two line segments (p1-p2 and q1-q2) intersect.
 """
-
+def is_line_intersecting(p1, p2, q1, q2):
+    def orientation(a, b, c):
+        VALUE = (b[1] - a[1]) * (c[0] - b[0]) - (b[0] - a[0]) * (c[1] - b[1])
+        
+        return 0 if VALUE == 0 else (1 if VALUE > 0 else -1)
+    
+    O1 = orientation(p1, p2, q1)
+    O2 = orientation(p1, p2, q2)
+    O3 = orientation(q1, q2, p1)
+    O4 = orientation(q1, q2, p2)
+    
+    return (O1 != O2) and (O3 != O4)
+    
 """
     function is_colliding_link():
-    # TODO: Check if a robot link intersects with any edge of the obstacle.
 """
+def is_colliding_link(link_start, link_end, obstacle_corners):
+    for i in range(len(obstacle_corners)):
+        CORNER_1 = obstacle_corners[i]
+        CORNER_2 = obstacle_corners[(i + 1) % len(obstacle_corners)]
+        
+        if is_line_intersecting(link_start, link_end, CORNER_1, CORNER_2):
+            return True
+    
+    return False
 
 """
     function get_polygon_corners():
