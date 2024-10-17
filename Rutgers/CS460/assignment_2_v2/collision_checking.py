@@ -18,11 +18,6 @@ from component_1 import (
 """
 
 """
-    function get_end_effector_position():
-    # TODO: Calculate the (x, y) position of the end-effector using forward kinematics.
-"""
-
-"""
     function is_line_intersecting():
     # TODO: Check if two line segments (p1-p2 and q1-q2) intersect.
 """
@@ -31,6 +26,18 @@ from component_1 import (
     function is_colliding_link():
     # TODO: Check if a robot link intersects with any edge of the obstacle.
 """
+
+"""
+    function get_end_effector_position():
+"""
+def get_end_effector_position(theta_1, theta_2):
+    joint_1_x = ARM_ROBOT_LINK_1_LENGTH * NP.cos(theta_1)
+    joint_1_y = ARM_ROBOT_LINK_1_LENGTH * NP.sin(theta_1)
+    
+    end_effector_x = joint_1_x + ARM_ROBOT_LINK_2_LENGTH * NP.cos(theta_1 + theta_2)
+    end_effector_y = joint_1_y + ARM_ROBOT_LINK_2_LENGTH * NP.sin(theta_1 + theta_2)
+    
+    return (joint_1_x, joint_1_y), (end_effector_x, end_effector_y)
 
 """
     function visualize_scene_arm():
