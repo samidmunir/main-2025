@@ -23,6 +23,9 @@ OBSTACLE_MIN_ORIENTATION, OBSTACLE_MAX_ORIENTATION = 0.0, 2.0 * NP.pi # in radia
 ARM_ROBOT_LINK_1_LENGTH = 2.0
 ARM_ROBOT_LINK_2_LENGTH = 1.5
 
+FREE_BODY_ROBOT_WIDTH = 0.5
+FREE_BODY_ROBOT_HEIGHT = 0.3
+
 
 """
     function generate_environments(number_of_obstacles: int)

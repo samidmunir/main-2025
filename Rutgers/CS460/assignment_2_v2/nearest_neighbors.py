@@ -11,7 +11,7 @@ import numpy as NP
 """
     CONSTANTS (from component_1.py)
 """
-from component_1 import ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION, ARM_ROBOT_LINK_1_LENGTH, ARM_ROBOT_LINK_2_LENGTH
+from component_1 import ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION, ARM_ROBOT_LINK_1_LENGTH, ARM_ROBOT_LINK_2_LENGTH, FREE_BODY_ROBOT_WIDTH, FREE_BODY_ROBOT_HEIGHT
 
 """
     function euclidean_distance():
@@ -127,22 +127,74 @@ def visualize_arm_robot_scene(CONFIGS, K_CLOSEST_CONFIGS, TARGET_CONFIG):
     target_base, target_joint1, target_end_effector = get_arm_position(theta_0 = TARGET_CONFIG[0], theta_1 = TARGET_CONFIG[1])
     visualize_arm_robot(FIGURE, AXES, target_base, target_joint1, target_end_effector, '#00ff00', '#00ff00')
     
-    AXES.set_title('2-Joint Arm Robot k Nearest Configurations')
+    AXES.set_title('2-Joint Arm Robot: k Nearest Configurations')
     # AXES.legend()
     
     PLT.show()
 
-#TODO: Implement calculate_free_body_robot_euclidean_difference()
-def calculate_free_body_robot_euclidean_difference():
-    pass
+#########################################################################
 
-# TODO: Implement load_free_body_robot_configs()
+"""
+    function find_k_nearest_free_body_configs():
+    - this function finds the k nearest free-body robot configurations to the target configuration.
+    - it takes as input the CONFIGS, K, and TARGET_CONFIG.
+    - it returns a list of the k closest free-body robot configurations.
+"""
+def find_k_nearest_free_body_configs(CONFIGS, K, TARGET_CONFIG):
+    SORTED_CONFIGS = sorted(CONFIGS, key = lambda x: euclidean_distance((x[0], x[1]), (TARGET_CONFIG[0], TARGET_CONFIG[1]))) # not account for orientation (angle)...
+    
+    K_CLOSEST_CONFIGS = SORTED_CONFIGS[:K]
+    
+    return K_CLOSEST_CONFIGS
+
+"""
+    function load_free_body_robot_configs():
+    - this functions reads a list of free-body robot configurations from a .txt file and returns alist of tuples in the form (x, y, theta).
+"""
 def load_free_body_robot_configs(filename: str) -> list:
-    pass
+    CONFIGS = []
+    with open(filename, 'r') as FILE:
+        for LINE in FILE:
+            x, y, theta = map(float, LINE.strip().split())
+            CONFIGS.append((x, y, theta))
+    
+    return CONFIGS
 
-# TODO: Implement visualize_free_body_robot_scene()
-def visualize_free_body_robot_scene():
-    pass
+"""
+    function visualize_free_body_robot():
+    - takes as input the CONFIGS, K_CLOSEST_CONFIGS, TARGET_CONFIG.
+    - visualizes the CONFIGS, K_CLOSEST_CONFIGS, and TARGET_CONFIG.
+"""
+def visualize_free_body_robot(FIGURE, AXES, x, y, theta, color):
+    # draw rectangle for free-body robot
+    # AXES.add_patch(PLT.Rectangle(x, y), FREE_BODY_ROBOT_WIDTH, FREE_BODY_ROBOT_HEIGHT,  angle = theta, color = color)
+    ROBOT = PTCHS.Rectangle((x, y), FREE_BODY_ROBOT_WIDTH, FREE_BODY_ROBOT_HEIGHT, angle = theta, color = color)
+    AXES.add_patch(ROBOT)
+
+"""
+    function visualize_free_body_robot_scene():
+    - takes as input the CONFIGS, K_CLOSEST_CONFIGS, and TARGET_CONFIG.
+    - visualizes the CONFIGS, K_CLOSEST_CONFIGS, and TARGET_CONFIG.
+"""
+def visualize_free_body_robot_scene(CONFIGS, K_CLOSEST_CONFIGS, TARGET_CONFIG):
+    FIGURE, AXES = PLT.subplots()
+    
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
+    AXES.set_ylim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
+    
+    for CONFIG in CONFIGS:
+        visualize_free_body_robot(FIGURE, AXES, CONFIG[0], CONFIG[1], CONFIG[2], '#000000')
+
+    for CONFIG in K_CLOSEST_CONFIGS:
+        visualize_free_body_robot(FIGURE, AXES, CONFIG[0], CONFIG[1], CONFIG[2], '#0000ff')
+    
+    visualize_free_body_robot(FIGURE, AXES, TARGET_CONFIG[0], TARGET_CONFIG[1], TARGET_CONFIG[2], '#00ff00')
+    
+    
+    AXES.set_title('Free-Body Robot: k Nearest Configurations')
+    
+    PLT.show()
 
 """
     function parse_arguments()
@@ -176,7 +228,11 @@ def main():
         K_CLOSEST_END_EFFECTOR_POSITIONS = find_k_nearest_end_effector_positions(end_effector_positions = END_EFFECTOR_POSITIONS, target_end_effector_position = TARGET_END_EFFECTOR_POSITIONS, k = number_of_nearest_neighbors)
         visualize_arm_robot_scene(CONFIGS = CONFIGS, K_CLOSEST_CONFIGS = K_CLOSEST_END_EFFECTOR_POSITIONS, TARGET_CONFIG = (TARGET_THETA_1, TARGET_THETA_2))
     elif ARGS.robot == 'freeBody':
-        pass
+        CONFIGS = load_free_body_robot_configs(filename = ARGS.configs)
+        TARGET_X, TARGET_Y, TARGET_THETA = ARGS.target
+        number_of_nearest_neighbors = ARGS.k
+        K_CLOSEST_CONFIGS = find_k_nearest_free_body_configs(CONFIGS = CONFIGS, K = number_of_nearest_neighbors, TARGET_CONFIG = (TARGET_X, TARGET_Y, TARGET_THETA))
+        visualize_free_body_robot_scene(CONFIGS = CONFIGS, K_CLOSEST_CONFIGS = K_CLOSEST_CONFIGS, TARGET_CONFIG = (TARGET_X, TARGET_Y, TARGET_THETA))
 
 if __name__ == '__main__':
     main()
