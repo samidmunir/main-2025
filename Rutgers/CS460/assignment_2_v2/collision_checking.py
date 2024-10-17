@@ -13,11 +13,6 @@ from component_1 import (
 )
 
 """
-    function get_polygon_corners():
-    # TODO: Calculate the world coordinates of the rectangle's corners.
-"""
-
-"""
     function is_line_intersecting():
     # TODO: Check if two line segments (p1-p2 and q1-q2) intersect.
 """
@@ -26,6 +21,32 @@ from component_1 import (
     function is_colliding_link():
     # TODO: Check if a robot link intersects with any edge of the obstacle.
 """
+
+"""
+    function get_polygon_corners():
+"""
+def get_polygon_corners(center, width, height, angle):
+    w, h = width / 2, height / 2
+    CORNERS = NP.array(
+        [
+            [-w, -h],
+            [w, -h],
+            [w, h],
+            [-w, h]
+        ]
+    )
+    
+    COS_THETA, SIN_THETA = NP.cos(angle), NP.sin(angle)
+    ROTATION_MATRIX = NP.array(
+        [
+            [COS_THETA, -SIN_THETA],
+            [SIN_THETA, COS_THETA]
+        ]
+    )
+    
+    ROTATED_CORNERS = CORNERS @ ROTATION_MATRIX.T
+    
+    return ROTATED_CORNERS + NP.array(center)
 
 """
     function get_end_effector_position():
@@ -42,8 +63,17 @@ def get_end_effector_position(theta_1, theta_2):
 """
     function visualize_scene_arm():
 """
-def visualize_scene_arm():
-    pass
+def visualize_scene_arm(environment, theta_1, theta_2, iteration):
+    FIGURE, AXES = PLT.subplots()
+    
+    BASE = (0, 0)
+    (joint_1_x, joint_1_y), (end_effector_x, end_effector_y) = get_end_effector_position(theta_1, theta_2)
+    JOINT_1 = (joint_1_x, joint_1_y)
+    END_EFFECTOR = (end_effector_x, end_effector_y)
+    
+    for OBSTACLE in environment:
+        x, y, width, height, angle = OBSTACLE
+        OBSTACLE_CORNERS = get_polygon_corners((x, y), width, height, angle)
 
 """
     function scene_from_file():
