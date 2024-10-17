@@ -13,6 +13,69 @@ from component_1 import (
 )
 
 """
+    function project():
+"""
+def project(corners, axis):
+    PROJECTIONS = NP.dot(corners, axis)
+    
+    return NP.min(PROJECTIONS), NP.max(PROJECTIONS)
+
+"""
+    function get_axes():
+"""
+def get_axes(corners):
+    EDGES = NP.diff(NP.vstack([corners, corners[0]]), axis = 0)
+    
+    return NP.array([[-edge[1], edge[0]] for edge in EDGES]) / NP.linalg.norm(EDGES, axis = 1, keepdims = True)
+
+"""
+    function is_colliding():
+"""
+def is_colliding(robot_corners, obstacle_corners):
+    AXES = NP.vstack([get_axes(robot_corners), get_axes(obstacle_corners)])
+    
+    for AXIS in AXES:
+        min_1, max_1 = project(robot_corners, AXIS)
+        min_2, max_2 = project(obstacle_corners, AXIS)
+        
+        if max_1 < min_2 or max_2 < min_1:
+            return False
+    
+    return True
+
+"""
+    function visualize_scene_free_body_robot():
+"""
+def visualize_scene_free_body_robot(environment, config, iteration):
+    FIGURE, AXES = PLT.subplots()
+    
+    ROBOT_CORNERS = get_polygon_corners(config[:2], config[2], FREE_BODY_ROBOT_WIDTH, FREE_BODY_ROBOT_HEIGHT)
+    
+    for OBSTACLE in environment:
+        x, y, width, height, angle = OBSTACLE
+        OBSTACLE_CORNERS = get_polygon_corners((x, y), width, height, angle)
+        
+        COLLIDING = is_colliding(ROBOT_CORNERS, OBSTACLE_CORNERS)
+        
+        COLOR = '#ff0000' if COLLIDING else '#000000'
+        OBSTACLE_PATCH = PTCHS.Polygon(OBSTACLE_CORNERS, closed = True, edgecolor = COLOR, fill = False)
+        AXES.add_patch(OBSTACLE_PATCH)
+    
+    ROBOT_PATCH = PTCHS.Polygon(ROBOT_CORNERS, closed = True, edgecolor = '#0000ff', fill = True, alpha = 0.5)
+    AXES.add_patch(ROBOT_PATCH)
+    
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
+    AXES.set_ylim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
+    PLT.title(f'Free Body Robot Collision Test (Iteration #{iteration})')
+    
+    PLT.show(block = False)
+    PLT.pause(1)
+    PLT.close(FIGURE)
+
+#######################################################################
+
+"""
     function is_line_intersecting():
 """
 def is_line_intersecting(p1, p2, q1, q2):
@@ -80,9 +143,20 @@ def get_end_effector_position(theta_1, theta_2):
     return (joint_1_x, joint_1_y), (end_effector_x, end_effector_y)
 
 """
-    function visualize_scene_arm():
+    function visualize_arm_robot():
 """
-def visualize_scene_arm(environment, theta_1, theta_2, iteration):
+def visualize_arm_robot(FIGURE, AXES, base, joint_1, end_effector, joint_color, line_color):
+    AXES.plot([base[0], joint_1[0]], [base[1], joint_1[1]], marker = 'o', color = f'{line_color}', label = 'Link 1')
+    AXES.plot([joint_1[0], end_effector[0]], [joint_1[1], end_effector[1]], marker = 'o', color = f'{line_color}', label = 'Link 2')
+    
+    AXES.plot(base[0], base[1], marker = 'o', color = f'{joint_color}', label = 'Base')
+    AXES.plot(joint_1[0], joint_1[1], marker = 'o', color = f'{joint_color}', label = 'Joint 1')
+    AXES.plot(end_effector[0], end_effector[1], marker = 'o', color = f'{line_color}', label = 'End Effector')
+
+"""
+    function visualize_scene_arm_robot():
+"""
+def visualize_scene_arm_robot(environment, theta_1, theta_2, iteration):
     FIGURE, AXES = PLT.subplots()
     
     BASE = (0, 0)
@@ -93,6 +167,25 @@ def visualize_scene_arm(environment, theta_1, theta_2, iteration):
     for OBSTACLE in environment:
         x, y, width, height, angle = OBSTACLE
         OBSTACLE_CORNERS = get_polygon_corners((x, y), width, height, angle)
+        
+        COLLIDING = (
+            is_colliding_link(BASE, JOINT_1, OBSTACLE_CORNERS) or is_colliding_link(JOINT_1, END_EFFECTOR, OBSTACLE_CORNERS)
+        )
+        
+        COLOR = '#ff0000' if COLLIDING else '#000000'
+        OBSTACLE_POLYGON = PTCHS.Polygon(OBSTACLE_CORNERS, color = COLOR, edgecolor = COLOR, fill = True, closed = True)
+        AXES.add_patch(OBSTACLE_POLYGON)
+        
+    visualize_arm_robot(FIGURE, AXES, BASE, JOINT_1, END_EFFECTOR, joint_color = '#000000', line_color = '#000000')
+    
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
+    AXES.set_ylim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
+    PLT.title(f'ARM Robot Collision Test (Iteration #{iteration})')
+    
+    PLT.show(block = False)
+    PLT.pause(1)
+    PLT.close(FIGURE)
 
 """
     function scene_from_file():
@@ -129,11 +222,19 @@ def main():
     
     if ARGS.robot == 'arm':
         for i in range(10):
-            theta_1 = RANDOM.uniform(0, 2 * MATH.pi)
-            theta_2 = RANDOM.uniform(0, 2 * MATH.pi)
-            # TODO: call function visualize_scene_arm()
+            THETA_1 = RANDOM.uniform(0, 2 * MATH.pi)
+            THETA_2 = RANDOM.uniform(0, 2 * MATH.pi)
+            visualize_scene_arm_robot(ENVIRONMENT, THETA_1, THETA_2, (i + 1))
+            TIME.sleep(1)
     elif ARGS.robot == 'freeBody':
-        pass
+        for i in range(10):
+            CONFIG = (
+                RANDOM.uniform(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION),
+                RANDOM.uniform(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION),
+                RANDOM.uniform(0, 2 * NP.pi)
+            )
+            visualize_scene_free_body_robot(ENVIRONMENT, CONFIG, (i + 1))
+            TIME.sleep(1)
 
 if __name__ == '__main__':
     main()
