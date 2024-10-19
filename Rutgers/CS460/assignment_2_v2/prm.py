@@ -92,21 +92,74 @@ def get_polygon_corners(center, width, height, angle):
     return ROTATED_CORNERS + NP.array(center)
 
 """
+    function is_line_intersecting():
+"""
+def is_line_intersecting(p1, p2, q1, q2):
+    def orientation(a, b, c):
+        VALUE = (b[1] - a[1]) * (c[0] - b[0]) - (b[0] - a[0]) * (c[1] - b[1])
+        
+        return 0 if VALUE == 0 else (1 if VALUE > 0 else -1)
+    
+    O1 = orientation(p1, p2, q1)
+    O2 = orientation(p1, p2, q2)
+    O3 = orientation(q1, q2, p1)
+    O4 = orientation(q1, q2, p2)
+    
+    return (O1 != O2) and (O3 != O4)
+    
+"""
+    function is_colliding_link():
+"""
+def is_colliding_link(link_start, link_end, obstacle_corners):
+    for i in range(len(obstacle_corners)):
+        CORNER_1 = obstacle_corners[i]
+        CORNER_2 = obstacle_corners[(i + 1) % len(obstacle_corners)]
+        
+        if is_line_intersecting(link_start, link_end, CORNER_1, CORNER_2):
+            return True
+    
+    return False
+
+"""
     function visualize_scene_arm_robot():
 """
-def visualize_scene_arm_robot(obstacles: list, random_samples: list):
+def visualize_scene_arm_robot(obstacles: list, random_samples: list, start_config, goal_config):
     FIGURE, AXES = PLT.subplots()
     
+    # Adding obstacles to the environment.
     for OBSTACLE in obstacles:
         x, y, width, height, angle = OBSTACLE
         OBSTACLE_CORNERS = get_polygon_corners((x, y), width, height, angle)
         
         OBSTACLE_COLOR = '#ff0000'
-        OBSTACLE_POLYGON = PTCHS.Polygon(OBSTACLE_CORNERS, color = OBSTACLE_COLOR, fill = True, closed = True)
+        OBSTACLE_POLYGON = PTCHS.Polygon(OBSTACLE_CORNERS, color = OBSTACLE_COLOR, fill = True, closed = True, alpha = 0.5)
         
         AXES.add_patch(OBSTACLE_POLYGON)
+        
     
-    PLT.title('Arm Robot Path Planning with PRM')
+    # Drawing randomly sampled arm robot *END_EFFECTOR* positions.
+    for RANDOM_SAMPLE in random_samples:
+        CONFIG, (BASE, JOINT_1, END_EFFECTOR) = RANDOM_SAMPLE
+        
+        END_EFFECTOR_X = END_EFFECTOR[0]
+        END_EFFECTOR_Y = END_EFFECTOR[1]
+        
+        AXES.plot(END_EFFECTOR_X, END_EFFECTOR_Y, 'o', color = '#000000')
+        
+    # Drawing START_END_EFFECTOR
+    START_CONFIG_BASE = start_config[0]
+    START_CONFIG_JOINT_1 = start_config[1]
+    START_CONFIG_END_EFFECTOR = start_config[2]
+    
+    AXES.plot(START_CONFIG_END_EFFECTOR[0], START_CONFIG_END_EFFECTOR[1], 'o', color = '#00ff00')
+    
+    # Drawing GOAL_END_EFFECTOR
+    GOAL_CONFIG_BASE = goal_config[0]
+    GOAL_CONFIG_JOINT_1 = goal_config[1]
+    GOAL_CONFIG_END_EFFECTOR = goal_config[2]
+    
+    AXES.plot(GOAL_CONFIG_END_EFFECTOR[0], GOAL_CONFIG_END_EFFECTOR[1], 'o', color = '#ff00ff')
+        
     AXES.set_aspect('equal')
     AXES.set_xlim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
     AXES.set_ylim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
@@ -150,7 +203,7 @@ def main():
         OBSTACLES = scene_from_file(ARGS.map)
         RANDOM_CONFIGS = generate_random_configs_arm_robot(num_samples = 5000)
         RANDOM_SAMPLES = get_random_arm_robot_samples(random_configs = RANDOM_CONFIGS)
-        visualize_scene_arm_robot(obstacles = OBSTACLES, random_samples = RANDOM_SAMPLES)
+        visualize_scene_arm_robot(obstacles = OBSTACLES, random_samples = RANDOM_SAMPLES, start_config = get_arm_robot_joint_positions(ARGS.start[0], ARGS.start[1]), goal_config = get_arm_robot_joint_positions(ARGS.goal[0], ARGS.goal[1]))
     elif ARGS.robot == 'freeBody':
         pass
 
