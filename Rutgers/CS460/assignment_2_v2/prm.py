@@ -26,7 +26,7 @@ from component_1 import ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION, ARM_
 ######################################################################
 
 """
-    function get_end_effector_position():
+    function get_arm_robot_joint_positions():
 """
 def get_arm_robot_joint_positions(theta_1, theta_2):
     joint_1_x = ARM_ROBOT_LINK_1_LENGTH * NP.cos(theta_1)
@@ -50,6 +50,33 @@ def generate_random_configs_arm_robot(num_samples: int) -> list:
         RANDOM_CONFIGS.append((theta_1, theta_2))
         
     return RANDOM_CONFIGS
+
+
+"""
+    function get_random_arm_robot_samples():
+"""
+def get_random_arm_robot_samples(random_configs: list) -> list:
+    RANDOM_SAMPLES = []
+    
+    for CONFIG in random_configs:
+        RANDOM_SAMPLE = get_arm_robot_joint_positions(CONFIG[0], CONFIG[1])
+        
+        RANDOM_SAMPLES.append((CONFIG, RANDOM_SAMPLE)) # appending THETA_1, THETA_2, BASE, JOINT_1, END_EFFECTOR
+        
+    return RANDOM_SAMPLES
+
+"""
+    function visualize_scene_arm_robot():
+"""
+def visualize_scene_arm_robot(obstacles: list, random_samples: list):
+    FIGURE, AXES = PLT.subplots()
+    
+    PLT.title('Arm Robot Path Planning with PRM')
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
+    AXES.set_ylim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
+    
+    PLT.show()
 
 
 """
@@ -84,7 +111,12 @@ def parse_arguments():
 def main():
     ARGS = parse_arguments()
     
-    OBSTACLES = scene_from_file(ARGS.map)
+    if ARGS.robot == 'arm':
+        OBSTACLES = scene_from_file(ARGS.map)
+        RANDOM_CONFIGS = generate_random_configs_arm_robot(num_samples = 5000)
+        RANDOM_SAMPLES = get_random_arm_robot_samples(random_configs = RANDOM_CONFIGS)
+    elif ARGS.robot == 'freeBody':
+        pass
 
 if __name__ == '__main__':
     main()
