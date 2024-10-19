@@ -66,10 +66,45 @@ def get_random_arm_robot_samples(random_configs: list) -> list:
     return RANDOM_SAMPLES
 
 """
+    function get_polygon_corners():
+"""
+def get_polygon_corners(center, width, height, angle):
+    w, h = width / 2, height / 2
+    CORNERS = NP.array(
+        [
+            [-w, -h],
+            [w, -h],
+            [w, h],
+            [-w, h]
+        ]
+    )
+    
+    COS_THETA, SIN_THETA = NP.cos(angle), NP.sin(angle)
+    ROTATION_MATRIX = NP.array(
+        [
+            [COS_THETA, -SIN_THETA],
+            [SIN_THETA, COS_THETA]
+        ]
+    )
+    
+    ROTATED_CORNERS = CORNERS @ ROTATION_MATRIX.T
+    
+    return ROTATED_CORNERS + NP.array(center)
+
+"""
     function visualize_scene_arm_robot():
 """
 def visualize_scene_arm_robot(obstacles: list, random_samples: list):
     FIGURE, AXES = PLT.subplots()
+    
+    for OBSTACLE in obstacles:
+        x, y, width, height, angle = OBSTACLE
+        OBSTACLE_CORNERS = get_polygon_corners((x, y), width, height, angle)
+        
+        OBSTACLE_COLOR = '#ff0000'
+        OBSTACLE_POLYGON = PTCHS.Polygon(OBSTACLE_CORNERS, color = OBSTACLE_COLOR, fill = True, closed = True)
+        
+        AXES.add_patch(OBSTACLE_POLYGON)
     
     PLT.title('Arm Robot Path Planning with PRM')
     AXES.set_aspect('equal')
@@ -115,6 +150,7 @@ def main():
         OBSTACLES = scene_from_file(ARGS.map)
         RANDOM_CONFIGS = generate_random_configs_arm_robot(num_samples = 5000)
         RANDOM_SAMPLES = get_random_arm_robot_samples(random_configs = RANDOM_CONFIGS)
+        visualize_scene_arm_robot(obstacles = OBSTACLES, random_samples = RANDOM_SAMPLES)
     elif ARGS.robot == 'freeBody':
         pass
 
