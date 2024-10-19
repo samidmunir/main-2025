@@ -26,6 +26,18 @@ from component_1 import ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION, ARM_
 ######################################################################
 
 """
+    function get_end_effector_position():
+"""
+def get_arm_robot_joint_positions(theta_1, theta_2):
+    joint_1_x = ARM_ROBOT_LINK_1_LENGTH * NP.cos(theta_1)
+    joint_1_y = ARM_ROBOT_LINK_1_LENGTH * NP.sin(theta_1)
+    
+    end_effector_x = joint_1_x + ARM_ROBOT_LINK_2_LENGTH * NP.cos(theta_1 + theta_2)
+    end_effector_y = joint_1_y + ARM_ROBOT_LINK_2_LENGTH * NP.sin(theta_1 + theta_2)
+    
+    return (0, 0), (joint_1_x, joint_1_y), (end_effector_x, end_effector_y)
+
+"""
     function generate_random_configs_arm_robot():
 """
 def generate_random_configs_arm_robot(num_samples: int) -> list:
