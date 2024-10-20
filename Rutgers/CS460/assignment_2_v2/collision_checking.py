@@ -6,11 +6,14 @@ import numpy as NP
 import matplotlib.pyplot as PLT
 import matplotlib.patches as PTCHS
 
+"""
+    CONSTANTS (from component_1.py)
+"""
 from component_1 import (
-    ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION, 
-    ARM_ROBOT_LINK_1_LENGTH, ARM_ROBOT_LINK_2_LENGTH, 
-    FREE_BODY_ROBOT_WIDTH, FREE_BODY_ROBOT_HEIGHT
-)
+        ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION, 
+        FREE_BODY_ROBOT_WIDTH, FREE_BODY_ROBOT_HEIGHT, 
+        ARM_ROBOT_LINK_1_LENGTH, ARM_ROBOT_LINK_2_LENGTH
+    )
 
 """
     function project():
@@ -73,7 +76,7 @@ def visualize_scene_free_body_robot(environment, config, iteration):
     PLT.pause(1)
     PLT.close(FIGURE)
 
-#######################################################################
+######################################################################
 
 """
     function is_line_intersecting():

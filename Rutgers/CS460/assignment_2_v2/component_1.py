@@ -26,6 +26,8 @@ ARM_ROBOT_LINK_2_LENGTH = 1.5
 FREE_BODY_ROBOT_WIDTH = 0.5
 FREE_BODY_ROBOT_HEIGHT = 0.3
 
+PRM_NUM_SAMPLES = 500
+
 
 """
     function generate_environments(number_of_obstacles: int)
