@@ -76,7 +76,7 @@ def visualize_scene_free_body_robot(environment, config, iteration):
     PLT.pause(1)
     PLT.close(FIGURE)
 
-######################################################################
+########################################################################
 
 """
     function is_line_intersecting():

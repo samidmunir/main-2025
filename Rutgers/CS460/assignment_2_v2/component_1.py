@@ -26,13 +26,16 @@ ARM_ROBOT_LINK_2_LENGTH = 1.5
 FREE_BODY_ROBOT_WIDTH = 0.5
 FREE_BODY_ROBOT_HEIGHT = 0.3
 
-PRM_NUM_SAMPLES = 500
+PRM_NUM_SAMPLES = 100
 
 
 """
     function generate_environments(number_of_obstacles: int)
+    - this function generates an environment with number_of_obstacles.
+    - it returns a list of obstacles.
+    - each obstacle is a tuple in the form (x, y, width, height, orientation).
 """
-def generate_environment(number_of_obstacles: int):
+def generate_environment(number_of_obstacles: int) -> list:
     OBSTACLES = []
     
     for _ in range(number_of_obstacles):

@@ -1,320 +1,495 @@
-"""
-    4. PRM: prm.py
-"""
+# import argparse
+# import random
+# import math
+# import numpy as np
+# import matplotlib.pyplot as plt
+# import matplotlib.patches as patches
+# import heapq
 
-"""
-    Python IMPORTS
-"""
+# from collision_checking import get_polygon_corners, is_colliding
+
+# # Normalize angle between 0 and 360
+# def normalize_angle(angle):
+#     return angle % 360
+
+# # Function to calculate the positions of each joint and end-effector for a 2-joint arm robot
+# def calculate_arm_positions(joint1_angle, joint2_angle, joint1_length=10.0, joint2_length=10.0):
+#     base = (0, 0)
+#     joint1 = (joint1_length * math.cos(math.radians(joint1_angle)),
+#               joint1_length * math.sin(math.radians(joint1_angle)))
+#     end_effector = (joint1[0] + joint2_length * math.cos(math.radians(joint1_angle + joint2_angle)),
+#                     joint1[1] + joint2_length * math.sin(math.radians(joint1_angle + joint2_angle)))
+#     return base, joint1, end_effector
+
+# # Interpolate points between two configurations
+# def interpolate_path(start, end, num_points=10):
+#     """Generate points between start and end for collision checking."""
+#     return np.linspace(start, end, num_points)
+
+# # Check if an edge between two nodes is collision-free
+# def is_edge_collision_free(start, end, obstacles):
+#     """Check if all intermediate points along an edge are free from obstacles."""
+#     for point in interpolate_path(start, end):
+#         if is_colliding(tuple(point), obstacles):
+#             return False  # Collision detected
+#     return True  # Edge is valid
+
+# # Generate random samples in the environment
+# def generate_samples(num_samples, width, height, obstacle_check_fn, robot_type):
+#     samples = []
+#     for _ in range(num_samples):
+#         while True:
+#             if robot_type == 'arm':
+#                 joint1 = random.uniform(0, 360)
+#                 joint2 = random.uniform(0, 360)
+#                 config = (joint1, joint2)
+#             else:  # freeBody robot
+#                 x = random.uniform(-20, 20)
+#                 y = random.uniform(-20, 20)
+#                 orientation = random.uniform(0, 360)
+#                 config = (x, y, orientation)
+#             if not obstacle_check_fn(config):
+#                 samples.append(config)
+#                 break
+#     return samples
+
+# # Build the PRM roadmap with valid edges only
+# def build_roadmap(samples, obstacles, k, obstacle_check_fn):
+#     """Construct the PRM roadmap ensuring no edges intersect with obstacles."""
+#     roadmap = {sample: [] for sample in samples}
+
+#     for i, start in enumerate(samples):
+#         distances = [(math.dist(start, end), end) for j, end in enumerate(samples) if i != j]
+#         distances.sort()  # Sort by distance to find k-nearest neighbors
+
+#         for _, neighbor in distances[:k]:
+#             if is_edge_collision_free(start, neighbor, obstacles):
+#                 roadmap[start].append(neighbor)
+#                 roadmap[neighbor].append(start)  # Undirected graph
+
+#     return roadmap
+
+# # A* search algorithm to find the shortest path
+# def astar(roadmap, start, goal):
+#     """A* algorithm to find the shortest path in the PRM roadmap."""
+#     open_set = [(0, start)]  # Priority queue with (cost, node)
+#     came_from = {}
+#     g_score = {node: float('inf') for node in roadmap}
+#     g_score[start] = 0
+
+#     while open_set:
+#         _, current = heapq.heappop(open_set)
+
+#         if current == goal:
+#             path = []
+#             while current in came_from:
+#                 path.append(current)
+#                 current = came_from[current]
+#             path.append(start)
+#             return path[::-1]  # Return reversed path
+
+#         for neighbor in roadmap[current]:
+#             tentative_g_score = g_score[current] + math.dist(current, neighbor)
+#             if tentative_g_score < g_score[neighbor]:
+#                 came_from[neighbor] = current
+#                 g_score[neighbor] = tentative_g_score
+#                 heapq.heappush(open_set, (tentative_g_score, neighbor))
+
+#     return []  # Return empty path if no solution found
+
+# # Visualize the PRM roadmap and the path
+# def visualize_roadmap(samples, obstacles, roadmap, path, robot_type):
+#     fig, ax = plt.subplots()
+#     ax.set_xlim(-20, 20)
+#     ax.set_ylim(-20, 20)
+
+#     # Draw obstacles
+#     for obstacle in obstacles:
+#         corners = get_polygon_corners(obstacle)
+#         patch = patches.Polygon(corners, closed=True, color='red', alpha=0.5)
+#         ax.add_patch(patch)
+
+#     # Draw PRM edges
+#     for node, neighbors in roadmap.items():
+#         for neighbor in neighbors:
+#             ax.plot([node[0], neighbor[0]], [node[1], neighbor[1]], 'gray', linestyle='--', alpha=0.7)
+
+#     # Draw path
+#     if path:
+#         for i in range(len(path) - 1):
+#             ax.plot([path[i][0], path[i + 1][0]], [path[i][1], path[i + 1][1]], 'blue', linewidth=2)
+
+#     # Draw start and goal
+#     ax.plot(path[0][0], path[0][1], 'go', markersize=10, label='Start')
+#     ax.plot(path[-1][0], path[-1][1], 'ro', markersize=10, label='Goal')
+
+#     plt.legend()
+#     plt.show()
+
+# # Load obstacles from the map file
+# def load_obstacles(map_file):
+#     obstacles = []
+#     with open(map_file, 'r') as file:
+#         for line in file:
+#             parts = list(map(float, line.strip().split(',')))
+#             if len(parts) == 5:
+#                 x, y, width, height, orientation = parts
+#                 obstacles.append((x, y, width, height, orientation))
+#     return obstacles
+
+# # Main function to parse input arguments and run the PRM algorithm
+# def main():
+#     parser = argparse.ArgumentParser(description="PRM Algorithm for Path Planning.")
+#     parser.add_argument('--robot', type=str, required=True, help='Type of robot: arm or freeBody')
+#     parser.add_argument('--start', nargs='+', type=float, required=True, help='Start configuration')
+#     parser.add_argument('--goal', nargs='+', type=float, required=True, help='Goal configuration')
+#     parser.add_argument('--map', type=str, required=True, help='Map file containing obstacles')
+#     args = parser.parse_args()
+
+#     obstacles = load_obstacles(args.map)
+
+#     num_samples = 500
+#     k = 6
+#     width, height = 20, 20
+
+#     start_config = tuple(args.start)
+#     goal_config = tuple(args.goal)
+
+#     samples = generate_samples(num_samples, width, height, lambda config: is_colliding(config, obstacles), args.robot)
+#     samples.append(start_config)
+#     samples.append(goal_config)
+
+#     roadmap = build_roadmap(samples, obstacles, k, lambda edge: False)
+#     path = astar(roadmap, start_config, goal_config)
+#     visualize_roadmap(samples, obstacles, roadmap, path, args.robot)
+
+# if __name__ == "__main__":
+#     main()
+
 import argparse
-import heapq
-import math as MATH
-import random as RANDOM
-import matplotlib.pyplot as PLT
-import matplotlib.patches as PTCHS
+import random
+import math
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import numpy as NP
+import heapq
 
-"""
-    CONSTANTS (from component_1.py)
-"""
-from component_1 import (
-        ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION, 
-        FREE_BODY_ROBOT_WIDTH, FREE_BODY_ROBOT_HEIGHT,ARM_ROBOT_LINK_1_LENGTH, ARM_ROBOT_LINK_2_LENGTH, PRM_NUM_SAMPLES
-    )
-"""
-    IMPORTS (from nearest_neighbors.py)
-"""
-from nearest_neighbors import (
-        calculate_arm_robot_end_effector_positions, find_k_nearest_end_effector_positions, find_k_nearest_free_body_configs
-    )
-"""
-    IMPORTS (from collision_checking.py)
-"""
-from collision_checking import (
-    is_colliding, 
-    is_colliding_link
-)
+from collision_checking import get_polygon_corners, project, is_colliding_link, is_line_intersecting, get_axes
 
-"""
-    function is_line_intersecting():
-"""
-def is_line_intersecting(p1, p2, q1, q2):
-    def orientation(a, b, c):
-        VALUE = (b[1] - a[1]) * (c[0] - b[0]) - (b[0] - a[0]) * (c[1] - b[1])
-        
-        return 0 if VALUE == 0 else (1 if VALUE > 0 else -1)
-    
-    O1 = orientation(p1, p2, q1)
-    O2 = orientation(p1, p2, q2)
-    O3 = orientation(q1, q2, p1)
-    O4 = orientation(q1, q2, p2)
-    
-    return (O1 != O2) and (O3 != O4)
+# Normalize angle between 0 and 360
+def normalize_angle(angle):
+    return angle % 360
 
-"""
-    function is_colliding_link():
-"""
-def is_colliding_link(link_start, link_end, obstacle_corners):
-    for i in range(len(obstacle_corners)):
-        CORNER_1 = obstacle_corners[i]
-        CORNER_2 = obstacle_corners[(i + 1) % len(obstacle_corners)]
-        
-        if is_line_intersecting(link_start, link_end, CORNER_1, CORNER_2):
-            return True
-    
+# Function to calculate the positions of each joint and end-effector for a 2-joint arm robot
+def calculate_arm_positions(joint1_angle, joint2_angle, joint1_length=10.0, joint2_length=10.0):
+    # Base position
+    base_x, base_y = 0, 0
+
+    # Joint 1 position
+    joint1_x = joint1_length * math.cos(math.radians(joint1_angle))
+    joint1_y = joint1_length * math.sin(math.radians(joint1_angle))
+
+    # End-effector position (Joint 2 relative to Joint 1)
+    end_effector_x = joint1_x + joint2_length * math.cos(math.radians(joint1_angle + joint2_angle))
+    end_effector_y = joint1_y + joint2_length * math.sin(math.radians(joint1_angle + joint2_angle))
+
+    return (base_x, base_y), (joint1_x, joint1_y), (end_effector_x, end_effector_y)
+
+# Function to generate random samples in the environment
+def generate_samples(num_samples, width, height, obstacle_check_fn, robot_type):
+    samples = []
+    for _ in range(num_samples):
+        while True:
+            if robot_type == 'arm':
+                joint1 = random.uniform(0, 360)
+                joint2 = random.uniform(0, 360)
+                config = (joint1, joint2)
+            else:  # freeBody robot
+                x = random.uniform(-20, 20)
+                y = random.uniform(-20, 20)
+                orientation = random.uniform(0, 360)
+                config = (x, y, orientation)
+            if not obstacle_check_fn(config):
+                samples.append(config)
+                break
+    return samples
+
+# Check for collision between a robot and an obstacle
+def is_collision(config, obstacles):
+    if len(config) == 3:  # freeBody robot
+        x, y, orientation = config
+        CONFIG_CORNERS = get_polygon_corners((x, y), 0.3, 0.5, orientation)
+        for obstacle in obstacles:
+            OBSTACLE_CORNERS = get_polygon_corners((obstacle[0], obstacle[1]), obstacle[2], obstacle[3], obstacle[4])
+            # obs_x, obs_y, obs_width, obs_height, orientation = obstacle
+            # if obs_x - obs_width / 2 <= x <= obs_x + obs_width / 2 and obs_y - obs_height / 2 <= y <= obs_y + obs_height / 2:
+            #     return True
+            if is_colliding(CONFIG_CORNERS, OBSTACLE_CORNERS):
+                return True
     return False
 
-"""
-    function get_polygon_corners():
-"""
-def get_polygon_corners(center, width, height, angle):
-    w, h = width / 2, height / 2
-    CORNERS = NP.array(
-        [
-            [-w, -h],
-            [w, -h],
-            [w, h],
-            [-w, h]
-        ]
-    )
-    
-    COS_THETA, SIN_THETA = NP.cos(angle), NP.sin(angle)
-    ROTATION_MATRIX = NP.array(
-        [
-            [COS_THETA, -SIN_THETA],
-            [SIN_THETA, COS_THETA]
-        ]
-    )
-    
-    ROTATED_CORNERS = CORNERS @ ROTATION_MATRIX.T
-    
-    return ROTATED_CORNERS + NP.array(center)
+# Get k-nearest neighbors for a given configuration
+def get_k_nearest_neighbors(config, samples, k):
+    distances = [(other, math.sqrt((config[0] - other[0]) ** 2 + (config[1] - other[1]) ** 2)) for other in samples]
+    distances.sort(key=lambda x: x[1])
+    return [neighbor for neighbor, _ in distances[:k]]
 
-######################################################################
-
-# freeBody Robot
 """
-    function generate_random_configs_free_body_robot():
+    function is_colliding():
 """
-def generate_random_configs_free_body_robot(num_samples: int) -> list:
-    RANDOM_CONFIGS = []
+def is_colliding(robot_corners, obstacle_corners):
+    robot_corners = NP.array(robot_corners)
+    robot_corners = 2 * robot_corners
+    obstacle_corners = NP.array(obstacle_corners)
+    obstacle_corners = 2 * obstacle_corners
+    AXES = NP.vstack([get_axes(robot_corners), get_axes(obstacle_corners)])
     
-    for i in range(num_samples):
-        x = RANDOM.uniform(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
-        y = RANDOM.uniform(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
-        theta = RANDOM.uniform(0, 2 * NP.pi)
+    for AXIS in AXES:
+        min_1, max_1 = project(robot_corners, AXIS)
+        min_2, max_2 = project(obstacle_corners, AXIS)
         
-        RANDOM_CONFIGS.append((x, y, theta))
-        
-    return RANDOM_CONFIGS
+        if max_1 < min_2 or max_2 < min_1:
+            return False
+    
+    return True
 
 """
-    function visualize_scene_free_body_robot():
+    def get_points_on_line():
 """
-def visualize_scene_free_body_robot(obstacles: list, random_samples: list, start_config, goal_config):
-    FIGURE, AXES = PLT.subplots()
+def get_points_on_line(x1, y1, x2, y2):
+    points = []
+    n = 5
+    for i in range(1, n + 1):
+        t = i / (n + 1)
+        x = x1 + t *  (x2 - x1)
+        y = y1 + t *  (y2 - y1)
+        points.append((x, y))
+    return points
     
-    # Adding obstacles to the environment.
-    for OBSTACLE in obstacles:
-        OBSTACLE_COLOR = '#ff0000'
-        x, y, width, height, orientation = OBSTACLE
-        OBSTACLE_RECTANGLE = PTCHS.Rectangle((x, y), width, height, angle = NP.rad2deg(orientation), color = '#ff0000', edgecolor = '#ff0000', alpha = 0.5)
-        AXES.add_patch(OBSTACLE_RECTANGLE)
-    
-    # Adding random samples to the environment.
-    for RANDOM_SAMPLE in random_samples:
-        X, Y = RANDOM_SAMPLE[0], RANDOM_SAMPLE[1]
-        AXES.plot(X, Y, 'o', color = '#000000', alpha = 0.5)
-    
-    # Adding start configuration to the environment.
-    START_CONFIG_X, START_CONFIG_Y = start_config[:2]
-    START_CONFIG_COLOR = '#00ff00'
-    START_CONFIG_RECTANGLE = PTCHS.Rectangle((START_CONFIG_X, START_CONFIG_Y), FREE_BODY_ROBOT_WIDTH, FREE_BODY_ROBOT_HEIGHT, angle = NP.rad2deg(start_config[2]), color = START_CONFIG_COLOR)
-    AXES.add_patch(START_CONFIG_RECTANGLE)
-    
-    # Adding goal configuration to the environment.
-    GOAL_CONFIG_X, GOAL_CONFIG_Y = goal_config[:2]
-    GOAL_CONFIG_COLOR = '#00ffff'
-    GOAL_CONFIG_RECTANGLE = PTCHS.Rectangle((GOAL_CONFIG_X, GOAL_CONFIG_Y), FREE_BODY_ROBOT_WIDTH, FREE_BODY_ROBOT_HEIGHT, angle = NP.rad2deg(goal_config[2]), color = GOAL_CONFIG_COLOR)
-    AXES.add_patch(GOAL_CONFIG_RECTANGLE)
-    
-    # Setting the environment properties.
-    AXES.set_aspect('equal')
-    AXES.set_xlim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
-    AXES.set_ylim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
-    
-    PLT.show()
-
-######################################################################
-
-# arm Robot
 
 """
-    function get_arm_robot_joint_positions():
+    def bresenham_line():
 """
-def get_arm_robot_joint_positions(theta_1, theta_2):
-    joint_1_x = ARM_ROBOT_LINK_1_LENGTH * NP.cos(theta_1)
-    joint_1_y = ARM_ROBOT_LINK_1_LENGTH * NP.sin(theta_1)
+def bresenham_line(x1, y1, x2, y2):
+    points = []
+    dx = abs(x2 - x1)
+    dy = abs(y2 - y1)
+    sx = 1 if x1 < x2 else -1
+    sy = 1 if y1 < y2 else -1
+    err = dx - dy
     
-    end_effector_x = joint_1_x + ARM_ROBOT_LINK_2_LENGTH * NP.cos(theta_1 + theta_2)
-    end_effector_y = joint_1_y + ARM_ROBOT_LINK_2_LENGTH * NP.sin(theta_1 + theta_2)
+    while True:
+        points.append((x1, y1))
+        if x1 == x2 and y1 == y2:
+            break
+        e2 = 2 * err
+        if e2 > -dy:
+            err -= dy
+            x1 += sx
+        if e2 < dx:
+            err += dx
+            y1 += sy
     
-    return (0, 0), (joint_1_x, joint_1_y), (end_effector_x, end_effector_y)
+    return points
+
+def is_point_in_aabb(point, rect):
+    """Check if a point (x, y) lies inside an axis-aligned rectangle."""
+    px, py = point
+    rx, ry, width, height, _ = rect  # Ignore orientation for AABB
+
+    return rx <= px <= rx + width and ry <= py <= ry + height
+
+def rotate_point(point, origin, angle):
+    """Rotate a point around an origin by a given angle (in radians)."""
+    px, py = point
+    ox, oy = origin
+
+    cos_angle = math.cos(-angle)
+    sin_angle = math.sin(-angle)
+
+    qx = ox + cos_angle * (px - ox) - sin_angle * (py - oy)
+    qy = oy + sin_angle * (px - ox) + cos_angle * (py - oy)
+
+    return qx, qy
+
+def is_point_in_obb(point, rect):
+    """Check if a point lies inside an oriented rectangle."""
+    x, y, width, height, orientation = rect
+
+    # Rotate the point back to align with the rectangle
+    rotated_point = rotate_point(point, (x, y), math.radians(orientation))
+
+    # Use AABB logic on the rotated point
+    return is_point_in_aabb(rotated_point, (x, y, width, height, 0))
 
 """
-    function generate_random_configs_arm_robot():
+    function is_line_crossing_obstacle():
+    - this function checks if a line (which represents a path from one node to another) intersects any obstacle.
+    - if returns True, it means the line crosses the obstacle.
+    - else, it returns False.
 """
-def generate_random_configs_arm_robot(num_samples: int) -> list:
-    RANDOM_CONFIGS = []
+def is_line_crossing_obstacle(line, obstacle):
+    x1, y1 = line[0], line[1]
+    x2, y2 = line[2], line[3]
+    OBSTACLE_CORNERS = get_polygon_corners((obstacle[0], obstacle[1]), obstacle[2], obstacle[3], obstacle[4])
+    CROSSING = (is_colliding_link(link_start=(x1, y1), link_end=(x2, y2), obstacle_corners = OBSTACLE_CORNERS))
     
-    for i in range(num_samples):
-        theta_1 = RANDOM.uniform(0, 2 * NP.pi)
-        theta_2 = RANDOM.uniform(0, 2 * NP.pi)
-        
-        RANDOM_CONFIGS.append((theta_1, theta_2))
-        
-    return RANDOM_CONFIGS
+    return CROSSING
+    
+# Build the PRM roadmap by connecting samples to their k-nearest neighbors
+def build_roadmap(samples, obstacles, k, obstacle_check_fn):
+    roadmap = {sample: [] for sample in samples}
+    for sample in samples:
+        neighbors = get_k_nearest_neighbors(sample, samples, k)
+        for neighbor in neighbors:
+            for obstacle in obstacles:
+                if not obstacle_check_fn((sample, neighbor)) and not obstacle_check_fn((neighbor, obstacle)) and not obstacle_check_fn((sample, obstacle)) and not is_line_crossing_obstacle((sample[0], sample[1], neighbor[0], neighbor[1]), obstacle = obstacle) and not is_line_crossing_obstacle((neighbor[0], neighbor[1], sample[0], sample[1]), obstacle = obstacle) and not is_point_in_obb((neighbor[0], neighbor[1]), obstacle) and not is_point_in_obb((sample[0], sample[1]), (obstacle)):
+                    POINTS = get_points_on_line(sample[0], sample[1], neighbor[0], neighbor[1])
+                    for POINT in POINTS:
+                        if not is_point_in_obb(POINT, obstacle):
+                            roadmap[sample].append(neighbor)
+                            roadmap[neighbor].append(sample)  # Bidirectional connection
+                    # roadmap[sample].append(neighbor)
+                    # roadmap[neighbor].append(sample)  # Bidirectional connection
+                # BESENHAM_LINE_POINTS = bresenham_line(sample[0], sample[1], neighbor[0], neighbor[1])
+                # for POINT in BESENHAM_LINE_POINTS:
+                #     if not is_point_in_obb(POINT, obstacle):
+                #         roadmap[sample].append(neighbor)
+                #         roadmap[neighbor].append(sample)  # Bidirectional connection
+    return roadmap
 
+# Heuristic function for A* search (Euclidean distance)
+def heuristic(a, b):
+    return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
 
-"""
-    function get_random_arm_robot_samples():
-"""
-def get_random_arm_robot_samples(random_configs: list) -> list:
-    RANDOM_SAMPLES = []
-    
-    for CONFIG in random_configs:
-        RANDOM_SAMPLE = get_arm_robot_joint_positions(CONFIG[0], CONFIG[1])
-        
-        RANDOM_SAMPLES.append((CONFIG, RANDOM_SAMPLE)) # appending THETA_1, THETA_2, BASE, JOINT_1, END_EFFECTOR
-        
-    return RANDOM_SAMPLES
-    
-"""
-    function visualize_scene_arm_robot():
-"""
-def visualize_scene_arm_robot(obstacles: list, random_samples: list, start_config, goal_config):
-    FIGURE, AXES = PLT.subplots()
-    
-    # Adding obstacles to the environment.
-    for OBSTACLE in obstacles:
-        x, y, width, height, angle = OBSTACLE
-        OBSTACLE_CORNERS = get_polygon_corners((x, y), width, height, angle)
-        
-        OBSTACLE_COLOR = '#ff0000'
-        OBSTACLE_POLYGON = PTCHS.Polygon(OBSTACLE_CORNERS, color = OBSTACLE_COLOR, fill = True, closed = True, alpha = 0.5)
-        
-        AXES.add_patch(OBSTACLE_POLYGON)
-        
-    
-    # Drawing randomly sampled arm robot *END_EFFECTOR* positions.
-    for RANDOM_SAMPLE in random_samples:
-        CONFIG, (BASE, JOINT_1, END_EFFECTOR) = RANDOM_SAMPLE
-        
-        END_EFFECTOR_X = END_EFFECTOR[0]
-        END_EFFECTOR_Y = END_EFFECTOR[1]
-        
-        AXES.plot(END_EFFECTOR_X, END_EFFECTOR_Y, 'o', color = '#000000')
-        
-    # Drawing START_END_EFFECTOR
-    START_CONFIG_BASE = start_config[0]
-    START_CONFIG_JOINT_1 = start_config[1]
-    START_CONFIG_END_EFFECTOR = start_config[2]
-    
-    AXES.plot(START_CONFIG_END_EFFECTOR[0], START_CONFIG_END_EFFECTOR[1], 'o', color = '#00ff00')
-    
-    # Drawing GOAL_END_EFFECTOR
-    GOAL_CONFIG_BASE = goal_config[0]
-    GOAL_CONFIG_JOINT_1 = goal_config[1]
-    GOAL_CONFIG_END_EFFECTOR = goal_config[2]
-    
-    AXES.plot(GOAL_CONFIG_END_EFFECTOR[0], GOAL_CONFIG_END_EFFECTOR[1], 'o', color = '#ff00ff')
-        
-    AXES.set_aspect('equal')
-    AXES.set_xlim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
-    AXES.set_ylim(ENVIRONMENT_MIN_POSITION, ENVIRONMENT_MAX_POSITION)
-    
-    PLT.show()
+# A* search algorithm to find the shortest path in the roadmap
+def astar(roadmap, start, goal):
+    open_list = []
+    heapq.heappush(open_list, (0, start))
+    came_from = {start: None}
+    g_score = {sample: float('inf') for sample in roadmap}
+    g_score[start] = 0
+    f_score = {sample: float('inf') for sample in roadmap}
+    f_score[start] = heuristic(start, goal)
 
-######################################################################
+    while open_list:
+        _, current = heapq.heappop(open_list)
 
-"""
-    function build_free_body_robot_road_map():
-"""
-def build_free_body_robot_road_map(samples, obstacles, k):
-    ROAD_MAP = {SAMPLE: [] for SAMPLE in samples}
-    
-    for SAMPLE in samples:
-        NEIGHBORS = find_k_nearest_free_body_configs(samples, k, SAMPLE)
-        for NEIGHBOR in NEIGHBORS:
-            ROAD_MAP[SAMPLE].append(NEIGHBOR)
-            ROAD_MAP[NEIGHBOR].append(SAMPLE) # bidirectional connection.
-    
-    return ROAD_MAP
-"""
-    function scene_from_file():
-"""
-def scene_from_file(filename: str) -> list:
-    OBSTACLES = []
-    
-    with open(filename, 'r') as FILE:
-        for LINE in FILE:
-            x, y, width, height, angle = map(float, LINE.strip().split(','))
-            OBSTACLES.append((x, y, width, height, angle))
-    
-    return OBSTACLES
+        if current == goal:
+            path = []
+            while current:
+                path.append(current)
+                current = came_from[current]
+            return path[::-1]  # Return reversed path
 
-"""
-    function parse_arguments():
-"""
-def parse_arguments():
-    PARSER = argparse.ArgumentParser(description = 'Path Planning with PRM')
-    
-    PARSER.add_argument('--robot', choices = ['arm', 'freeBody'], required = True, type = str, help = 'Type of robot (arm or freeBody)')
-    PARSER.add_argument('--start', nargs = '+', type = float, required = True, help = 'Start configuration of robot')
-    PARSER.add_argument('--goal', nargs = '+', type = float, required = True, help = 'Goal configuration of robot')
-    PARSER.add_argument('--map', type = str, required = True, help = 'Filename containing map of environment')
-    
-    return PARSER.parse_args()
+        for neighbor in roadmap[current]:
+            tentative_g_score = g_score[current] + heuristic(current, neighbor)
 
-"""
-    function build_prm():
-"""
-"""
-def build_prm(robot_type: str, configs, k = 6, obstacles = []):
-    GRAPH = {i: [] for i in range(len(configs))}
-    if robot_type == 'arm':
-        END_EFFECTOR_POSITIONS, _ = calculate_arm_robot_end_effector_positions(configs, configs[0])
-        for i, position in enumerate(END_EFFECTOR_POSITIONS):
-            NEIGHBORS = find_k_nearest_end_effector_positions(END_EFFECTOR_POSITIONS, position[2:], k)
-            for j in NEIGHBORS:
-                if is_collision_free_path(configs[i], configs[j], obstacles, robot_type):
-                    GRAPH[i].append((j[0], NP.linalg.norm(configs[i] - configs[j[0]])))
-    else:
-        for i, config in enumerate(configs):
-            neighbors = find_k_nearest_free_body_configs(configs, k, config)
-            for j in neighbors:
-                print(f'\nconfig', config)
-                print(f'j', j)
-                if is_collision_free_path(config_1=config, config_2=j, obstacles=obstacles, robot_type=robot_type):
-                    GRAPH[i].append((j, NP.linalg.norm(config - configs[j])))
-    return GRAPH
-"""
+            if tentative_g_score < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, goal)
+                heapq.heappush(open_list, (f_score[neighbor], neighbor))
 
-"""
-    function main():
-"""
+    return None  # No path found
+
+# Visualize the roadmap and the found path for both arm robot and freeBody robot
+def visualize_roadmap(samples, obstacles, roadmap, path=None, robot_type='freeBody'):
+    fig, ax = plt.subplots()
+
+    # Plot obstacles
+    for obstacle in obstacles:
+        obs_x, obs_y, obs_width, obs_height, orientation = obstacle
+        rect = patches.Rectangle(
+            (obs_x, obs_y),
+            obs_width, obs_height, edgecolor='black', facecolor='gray', angle = orientation
+        )
+        ax.add_patch(rect)
+
+    # Plot roadmap (nodes and edges)
+    for sample in roadmap:
+        if robot_type == 'arm':
+            # Calculate the end-effector position for the arm robot
+            base, joint1, end_effector = calculate_arm_positions(sample[0], sample[1])
+            # Plot the arm as connected line segments
+            ax.plot([base[0], joint1[0], end_effector[0]], [base[1], joint1[1], end_effector[1]], 'b-', lw=2, label="Arm")
+            # Plot the joints
+            ax.scatter([base[0], joint1[0], end_effector[0]], [base[1], joint1[1], end_effector[1]], color='red', s=50, zorder=5, label="Joints")
+        else:
+            x, y, _ = sample  # Use x, y for the freeBody robot
+            ax.scatter(x, y, color='blue', s=7.5, alpha = 0.75)
+
+        for neighbor in roadmap[sample]:
+            if robot_type == 'arm':
+                # Calculate the end-effector position for the arm robot's neighbor
+                base_n, joint1_n, end_effector_n = calculate_arm_positions(neighbor[0], neighbor[1])
+                ax.plot([end_effector[0], end_effector_n[0]], [end_effector[1], end_effector_n[1]], color='blue', lw=0.5)
+            else:
+                nx, ny, _ = neighbor
+                ax.plot([x, nx], [y, ny], color='blue', lw=0.5, alpha = 0.5)
+
+    # Plot the path if available
+    if path:
+        for i in range(len(path) - 1):
+            if robot_type == 'arm':
+                base_1, joint1_1, end_effector_1 = calculate_arm_positions(path[i][0], path[i][1])
+                base_2, joint1_2, end_effector_2 = calculate_arm_positions(path[i + 1][0], path[i + 1][1])
+                ax.plot([end_effector_1[0], end_effector_2[0]], [end_effector_1[1], end_effector_2[1]], color='red', lw=2)
+            else:
+                x1, y1, _ = path[i]
+                x2, y2, _ = path[i + 1]
+                ax.plot([x1, x2], [y1, y2], color='red', lw=2)
+
+    ax.set_xlim(-20, 20)
+    ax.set_ylim(-20, 20)
+    plt.gca().set_aspect('equal', adjustable='box')
+    plt.show()
+
+# Load obstacles from the map file
+def load_obstacles(filename):
+    obstacles = []
+    with open(filename, 'r') as file:
+        for line in file:
+            parts = list(map(float, line.strip().split(',')))
+            if len(parts) == 5:
+                x, y, width, height, orientation = parts
+                # For simplicity, we ignore orientation for now in the obstacle definition
+                obstacles.append((x, y, width, height, orientation))
+    return obstacles
+
+# Main function to parse input arguments and run the PRM algorithm
 def main():
-    ARGS = parse_arguments()
-    
-    if ARGS.robot == 'arm':
-        OBSTACLES = scene_from_file(ARGS.map)
-        RANDOM_CONFIGS = generate_random_configs_arm_robot(num_samples = PRM_NUM_SAMPLES)
-        RANDOM_SAMPLES = get_random_arm_robot_samples(random_configs = RANDOM_CONFIGS)
-        visualize_scene_arm_robot(obstacles = OBSTACLES, random_samples = RANDOM_SAMPLES, start_config = get_arm_robot_joint_positions(ARGS.start[0], ARGS.start[1]), goal_config = get_arm_robot_joint_positions(ARGS.goal[0], ARGS.goal[1]))
-    elif ARGS.robot == 'freeBody':
-        OBSTACLES = scene_from_file(ARGS.map)
-        RANDOM_SAMPLES = generate_random_configs_free_body_robot(num_samples = PRM_NUM_SAMPLES)
-        visualize_scene_free_body_robot(obstacles = OBSTACLES, random_samples = RANDOM_SAMPLES, start_config = ARGS.start, goal_config = ARGS.goal)
-        build_free_body_robot_road_map(obstacles = OBSTACLES, samples = RANDOM_SAMPLES, k = PRM_NUM_SAMPLES)
+    parser = argparse.ArgumentParser(description="PRM Algorithm for Path Planning.")
+    parser.add_argument('--robot', type=str, required=True, help='Type of robot: arm or freeBody')
+    parser.add_argument('--start', nargs='+', type=float, required=True, help='Start configuration (x, y, orientation for freeBody or joint1, joint2 for arm)')
+    parser.add_argument('--goal', nargs='+', type=float, required=True, help='Goal configuration (x, y, orientation for freeBody or joint1, joint2 for arm)')
+    parser.add_argument('--map', type=str, required=True, help='Map file containing obstacles')
+    args = parser.parse_args()
 
-if __name__ == '__main__':
+    # Load obstacles from the map file
+    obstacles = load_obstacles(args.map)
+
+    # Generate random samples in free space
+    num_samples = 750  # You can adjust this
+    k = 6 # Number of nearest neighbors
+    width, height = 20, 20  # Environment dimensions
+
+    start_config = tuple(args.start)
+    goal_config = tuple(args.goal)
+    
+    # Add start and goal to samples
+    samples = generate_samples(num_samples, width, height, lambda config: is_collision(config, obstacles), args.robot)
+    samples.append(start_config)
+    samples.append(goal_config)
+
+    # Build the roadmap
+    roadmap = build_roadmap(samples, obstacles, k, lambda edge: False)
+
+    # Find the shortest path using A* search
+    path = astar(roadmap, start_config, goal_config)
+
+    # Visualize the roadmap and the path
+    visualize_roadmap(samples, obstacles, roadmap, path, args.robot)
+
+if __name__ == "__main__":
     main()

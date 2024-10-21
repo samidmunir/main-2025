@@ -5,7 +5,9 @@
     2. Nearest neighbors with linear search approach
         - nearest_neighbors.py
     3. Collision checking
+        - collision_checking.py
     4. PRM
+        - prm.py
     5. RRT
     6. PRM*/RRT*
 """
@@ -20,7 +22,17 @@
         python3 nearest_neighbors.py --robot freeBody --target 10.0 10.0 360.0 -k 3 --configs configs.txt --save_nearest_neighbors
     
     3. Collision checking
+    
+        python3 collision_checking.py --robot arm --map environment_5.tx
+        
+        python3 collision_checking.py --robot freeBody --map environment_5.txt
+        
     4. PRM
+    
+        python3 prm.py --robot arm --start 0.0 0.0 --goal 3.57 3.57 --map environment_5.txt
+        
+        python3 prm.py --robot arm --start 0.0 0.0 --goal 3.57 3.57 --map environment_5.txt
+        
     5. RRT
     6. PRM*/RRT*
 """
