@@ -19,7 +19,7 @@ from component_1 import (
     ENVIRONMENT_HEIGHT_MIN,
     ENVIRONMENT_HEIGHT_MAX,
     OBSTACLE_MIN_SIZE,
-    OBSTACLE_MAX_SIZE    
+    OBSTACLE_MAX_SIZE
 )
 
 # CONSTANTS
@@ -27,6 +27,32 @@ ARM_ROBOT_LINK_1_LENGTH = 2.0
 ARM_ROBOT_LINK_2_LENGTH = 1.5
 FREE_BODY_ROBOT_WIDTH = 0.5
 FREE_BODY_ROBOT_HEIGHT = 0.3
+
+"""
+    function get_angular_difference(theta_1, theta_2) -> float:
+"""
+def get_angular_difference(theta_1: float, theta_2: float) -> float:
+    ANGR_DIFF = NP.abs(theta_1 - theta_2) % (2 * NP.pi)
+    
+    return min(ANGR_DIFF, 2 * NP.pi - ANGR_DIFF)
+
+"""
+    function get_k_nearest_freeBody_robot_configurations(configs, target_config, k) -> list:
+"""
+def get_k_nearest_freeBody_robot_configurations(configs: list, target_config: tuple, orientation_weight: float, k: int) -> list:
+    CONFIG_DISTS = []
+    
+    TARGET_X, TARGET_Y, TARGET_THETA = target_config
+    
+    for CONFIG in configs:
+        CONFIG_DIST = get_euclidean_distance((CONFIG[0], CONFIG[1]), (TARGET_X, TARGET_Y)) + orientation_weight * get_angular_difference(CONFIG[2], TARGET_THETA)
+    
+        CONFIG_DISTS.append((CONFIG, CONFIG_DIST))
+    
+    CONFIG_DISTS.sort(key = lambda W_DIST: W_DIST[1])
+    K_NEAREST_CONFIGS = CONFIG_DISTS[:k]
+    
+    return K_NEAREST_CONFIGS
 
 """
     function handle_drawing_freeBody_robot(figure, axes, config: tuple):
@@ -44,11 +70,16 @@ def handle_drawing_freeBody_robot(figure, axes, config: tuple, edge_color: str, 
 """
     function visualize_scene_freeBody_robot():
 """
-def visualize_scene_freeBody_robot(configs: list, target_config: tuple) -> None:
+def visualize_scene_freeBody_robot(configs: list, k_nearest_configs: list, target_config: tuple) -> None:
     FIGURE, AXES = PLT.subplots()
     
     for CONFIG in configs:
         handle_drawing_freeBody_robot(figure = FIGURE, axes = AXES, config = CONFIG, edge_color = '#000000', fill_color = '#000000')
+    
+    for CONFIG in k_nearest_configs:
+        handle_drawing_freeBody_robot(figure = FIGURE, axes = AXES, config = CONFIG[0], edge_color = '#0000ff', fill_color = '#0000ff')
+        
+    handle_drawing_freeBody_robot(figure = FIGURE, axes = AXES, config = target_config, edge_color = '#00ff00', fill_color = '#00ff00')
     
     AXES.set_aspect('equal')
     AXES.set_xlim(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
@@ -232,7 +263,8 @@ def main():
         visualize_scene_arm_robot(configs = CONFIGS, k_nearest_configs = K_NEAREST_CONFIGS, target_config = ARGS.target)
     elif ARGS.robot == 'freeBody':
         CONFIGS = load_sample_freeBody_configs(filename = ARGS.configs)
-        visualize_scene_freeBody_robot(configs = CONFIGS, target_config = ARGS.target)
+        K_NEAREST_CONFIGS = get_k_nearest_freeBody_robot_configurations(configs = CONFIGS, target_config = ARGS.target, orientation_weight = 0.25, k = ARGS.k)
+        visualize_scene_freeBody_robot(configs = CONFIGS, k_nearest_configs = K_NEAREST_CONFIGS, target_config = ARGS.target)
 
 if __name__ == '__main__':
     main()
