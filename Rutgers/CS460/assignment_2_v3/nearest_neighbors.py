@@ -25,6 +25,38 @@ from component_1 import (
 # CONSTANTS
 ARM_ROBOT_LINK_1_LENGTH = 2.0
 ARM_ROBOT_LINK_2_LENGTH = 1.5
+FREE_BODY_ROBOT_WIDTH = 0.5
+FREE_BODY_ROBOT_HEIGHT = 0.3
+
+"""
+    function handle_drawing_freeBody_robot(figure, axes, config: tuple):
+"""
+def handle_drawing_freeBody_robot(figure, axes, config: tuple, edge_color: str, fill_color: str):
+    FIGURE = figure
+    AXES = axes
+    
+    x, y, theta = config
+    
+    ROBOT_RECTANGLE = PTCHS.Rectangle((x, y), FREE_BODY_ROBOT_WIDTH, FREE_BODY_ROBOT_HEIGHT, angle = NP.rad2deg(theta), color = fill_color, edgecolor = edge_color, linewidth = 1.0, alpha = 0.50)
+    
+    AXES.add_patch(ROBOT_RECTANGLE)
+    
+"""
+    function visualize_scene_freeBody_robot():
+"""
+def visualize_scene_freeBody_robot(configs: list, target_config: tuple) -> None:
+    FIGURE, AXES = PLT.subplots()
+    
+    for CONFIG in configs:
+        handle_drawing_freeBody_robot(figure = FIGURE, axes = AXES, config = CONFIG, edge_color = '#000000', fill_color = '#000000')
+    
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
+    AXES.set_ylim(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
+    
+    PLT.title('Free-body robot configurations')
+    
+    PLT.show()
 
 """
     function load_sample_freeBody_configs(filename: str) -> list:
@@ -38,7 +70,7 @@ def load_sample_freeBody_configs(filename: str) -> list:
         LINES = FILE.readlines()
         
         for LINE in LINES:
-            VALUES = LINE.strip().split('')
+            VALUES = LINE.strip().split()
             
             x, y, theta = VALUES[0], VALUES[1], VALUES[2]
             
@@ -197,10 +229,10 @@ def main():
     if ARGS.robot == 'arm':
         CONFIGS = load_sample_arm_robot_configs(filename = ARGS.configs)
         K_NEAREST_CONFIGS = get_k_nearest_arm_robot_configurations(configs = CONFIGS, target_config = ARGS.target, k = ARGS.k)
-        print('\n', K_NEAREST_CONFIGS)
         visualize_scene_arm_robot(configs = CONFIGS, k_nearest_configs = K_NEAREST_CONFIGS, target_config = ARGS.target)
     elif ARGS.robot == 'freeBody':
-        print('\n*** NOT YET SUPPORTED ***\n')
+        CONFIGS = load_sample_freeBody_configs(filename = ARGS.configs)
+        visualize_scene_freeBody_robot(configs = CONFIGS, target_config = ARGS.target)
 
 if __name__ == '__main__':
     main()
