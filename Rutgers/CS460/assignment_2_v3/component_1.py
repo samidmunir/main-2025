@@ -52,3 +52,32 @@ def scene_to_file(environment: list, filename: str):
     
     time.sleep(2)
     print(f'\tEnvironment saved to FILE <{filename}>.')
+    
+"""
+    function scene_from_file(filename: str) -> list:
+"""
+def scene_from_file(filename: str) -> list:
+    print(f'\nscene_from_file({filename}) called...')
+    
+    OBSTACLES = []
+    
+    with open(filename, 'r') as FILE:
+        LINES = FILE.readlines()
+        
+        for LINE in LINES:
+            VALUES = LINE.strip().split(',')
+            
+            x = float(VALUES[0])
+            y = float(VALUES[1])
+            width = float(VALUES[2])
+            height = float(VALUES[3])
+            theta = float(VALUES[4])
+            
+            OBSTACLE = (x, y, width, height, theta)
+            
+            OBSTACLES.append(OBSTACLE)
+    
+    time.sleep(2)
+    print(f'\tEnvironment loaded from FILE <{filename}>.')
+    
+    return OBSTACLES
