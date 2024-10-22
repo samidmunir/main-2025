@@ -27,6 +27,31 @@ ARM_ROBOT_LINK_1_LENGTH = 2.0
 ARM_ROBOT_LINK_2_LENGTH = 1.5
 
 """
+    function load_sample_freeBody_configs(filename: str) -> list:
+"""
+def load_sample_freeBody_configs(filename: str) -> list:
+    print(f'\nload_sample_freeBody_configs({filename}) called...')
+    
+    CONFIGS = []
+    
+    with open(filename, 'r') as FILE:
+        LINES = FILE.readlines()
+        
+        for LINE in LINES:
+            VALUES = LINE.strip().split('')
+            
+            x, y, theta = VALUES[0], VALUES[1], VALUES[2]
+            
+            CONFIG = (float(x), float(y), float(theta))
+            
+            CONFIGS.append(CONFIG)
+    
+    TIME.sleep(2)
+    print(f'\tSample free body configurations loaded from FILE <{filename}>.')
+    
+    return CONFIGS
+
+"""
     function get_euclidean_distance(point, target_point) -> float:
 """
 def get_euclidean_distance(point, target_point):
@@ -35,33 +60,64 @@ def get_euclidean_distance(point, target_point):
     return EUCLIDEAN_DIST
 
 """
+    function get_k_nearest_arm_robot_configurations(configs, target_config) -> list:
+"""
+def get_k_nearest_arm_robot_configurations(configs, target_config, k: int):
+    
+    CONFIGS_DISTS = []
+    
+    TARGET_BASE, TARGET_JOINT, TARGET_END_EFFECTOR = get_arm_robot_joint_positions(target_config[0], target_config[1])
+    
+    for CONFIG in configs:
+        print(len(CONFIG))
+        END_EFFECTOR = CONFIG[4]
+        EUCLIDEAN_DIST = get_euclidean_distance(END_EFFECTOR, TARGET_END_EFFECTOR)
+        CONFIGS_DISTS.append((CONFIG, EUCLIDEAN_DIST))
+    
+    CONFIGS_DISTS.sort(key = lambda EUC_DIST: EUC_DIST[1])
+    
+    SORTED_END_EFFECTOR_POSITIONS = sorted(configs)
+    
+    K_NEAREST_CONFIGS = CONFIGS_DISTS[:k]
+    
+    return K_NEAREST_CONFIGS
+
+"""
     function handle_drawing_arm_robot(config: tuple) -> None:
 """
-def handle_drawing_arm_robot(figure, axes, config: tuple) -> None:
-    print(f'\nhandle_drawing_arm_robot({config}) called...')
+def handle_drawing_arm_robot(figure, axes, config: tuple, joint_color: str, line_color: str) -> None:
+    # print(f'\nhandle_drawing_arm_robot({config}) called...')
     
     FIGURE = figure
     AXES = axes
     
     THETA_1, THETA_2, BASE, JOINT, END_EFFECTOR = config
     
-    AXES.plot([BASE[0], JOINT[0]], [BASE[1], JOINT[1]], marker = 'o', color = '#000000')
-    AXES.plot([JOINT[0], END_EFFECTOR[0]], [JOINT[1], END_EFFECTOR[1]], marker = 'o', color = '#000000')
+    AXES.plot([BASE[0], JOINT[0]], [BASE[1], JOINT[1]], marker = 'o', color = line_color, linewidth = 1.0)
+    AXES.plot([JOINT[0], END_EFFECTOR[0]], [JOINT[1], END_EFFECTOR[1]], marker = 'o', color = line_color, linewidth = 1.0)
     
-    AXES.plot(BASE[0], BASE[1], marker = 'o', color = '#000000', label = 'Base')
-    AXES.plot(JOINT[0], JOINT[1], marker = 'o', color = '#ff0000', label = 'Joint')
-    AXES.plot(END_EFFECTOR[0], END_EFFECTOR[1], marker = 'o', color = '#00ff00', label = 'End-effector')
+    AXES.plot(BASE[0], BASE[1], marker = 'o', color = joint_color, label = 'Base')
+    AXES.plot(JOINT[0], JOINT[1], marker = 'o', color = joint_color, label = 'Joint')
+    AXES.plot(END_EFFECTOR[0], END_EFFECTOR[1], marker = 'o', color = joint_color, label = 'End-effector')
 
 """
     function visualize_scene_arm_robot(configs: list) -> None:
 """
-def visualize_scene_arm_robot(configs: list) -> None:
-    print(f'\nvisualize_scene_arm_robot({configs}) called...')
+def visualize_scene_arm_robot(configs: list, k_nearest_configs: list, target_config) -> None:
+    # print(f'\nvisualize_scene_arm_robot({configs}) called...')
     
     FIGURE, AXES = PLT.subplots()
     
     for CONFIG in configs:
-        handle_drawing_arm_robot(figure = FIGURE, axes = AXES, config = CONFIG)
+        handle_drawing_arm_robot(figure = FIGURE, axes = AXES, config = CONFIG, line_color = '#000000', joint_color = '#000000')
+        
+    for CONFIG in k_nearest_configs:
+        handle_drawing_arm_robot(figure = FIGURE, axes = AXES, config = CONFIG[0], line_color = '#00ffff', joint_color = '#00ffff')
+
+    TARGET_BASE, TARGET_JOINT, TARGET_END_EFFECTOR = get_arm_robot_joint_positions(theta_1 = target_config[0], theta_2 = target_config[1])
+    TARGET_CONFIG = (target_config[0], target_config[1], TARGET_BASE, TARGET_JOINT, TARGET_END_EFFECTOR)
+    
+    handle_drawing_arm_robot(figure = FIGURE, axes = AXES, config = TARGET_CONFIG, line_color = '#00ff00', joint_color = '#00ff00')
     
     AXES.set_aspect('equal')
     AXES.set_xlim(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
@@ -77,7 +133,7 @@ def visualize_scene_arm_robot(configs: list) -> None:
     function get_arm_robot_joint_positions(theta_1, theta_2) -> list:
 """
 def get_arm_robot_joint_positions(theta_1: float, theta_2: float) -> list:
-    print(f'\nget_arm_robot_joint_positions({theta_1}, {theta_2}) called...')
+    # print(f'\nget_arm_robot_joint_positions({theta_1}, {theta_2}) called...')
     
     BASE = (0, 0)
     
@@ -95,7 +151,7 @@ def get_arm_robot_joint_positions(theta_1: float, theta_2: float) -> list:
     function load_sample_arm_robot_configs() -> list:
 """
 def load_sample_arm_robot_configs(filename: str) -> list:
-    print(f'\nload_sample_arm_robot_configs() called...')
+    # print(f'\nload_sample_arm_robot_configs() called...')
     
     CONFIGS = []
     
@@ -139,8 +195,10 @@ def main():
     ARGS = parse_arguments()
     
     if ARGS.robot == 'arm':
-        CONFIGS = load_sample_arm_robot_configs(ARGS.configs)
-        visualize_scene_arm_robot(configs = CONFIGS)
+        CONFIGS = load_sample_arm_robot_configs(filename = ARGS.configs)
+        K_NEAREST_CONFIGS = get_k_nearest_arm_robot_configurations(configs = CONFIGS, target_config = ARGS.target, k = ARGS.k)
+        print('\n', K_NEAREST_CONFIGS)
+        visualize_scene_arm_robot(configs = CONFIGS, k_nearest_configs = K_NEAREST_CONFIGS, target_config = ARGS.target)
     elif ARGS.robot == 'freeBody':
         print('\n*** NOT YET SUPPORTED ***\n')
 
