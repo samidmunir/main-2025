@@ -14,6 +14,13 @@ import random as RANDOM
 import time
 
 # CONSTANTS
+ENVIRONMENT_WIDTH_MIN = -10.0
+ENVIRONMENT_WIDTH_MAX = 10.0
+ENVIRONMENT_HEIGHT_MIN = -10.0
+ENVIRONMENT_HEIGHT_MAX = 10.0
+
+OBSTACLE_MIN_SIZE = 0.5
+OBSTACLE_MAX_SIZE = 2.0
 
 """
     function generate_environment(number_of_obstacles: int) -> list:
@@ -25,10 +32,10 @@ def generate_environment(number_of_obstacles: int) -> list:
     
     for i in range(number_of_obstacles):
         
-        x = RANDOM.uniform(-10, 10)
-        y = RANDOM.uniform(-10, 10)
-        width = RANDOM.uniform(0.5, 2.0)
-        height = RANDOM.uniform(0.5, 2.0)
+        x = RANDOM.uniform(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
+        y = RANDOM.uniform(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
+        width = RANDOM.uniform(OBSTACLE_MIN_SIZE, OBSTACLE_MAX_SIZE)
+        height = RANDOM.uniform(OBSTACLE_MIN_SIZE, OBSTACLE_MAX_SIZE)
         theta = RANDOM.uniform(0, (2 * NP.pi))
         
         OBSTACLE = (x, y, width, height, theta)
@@ -94,3 +101,13 @@ def visualize_scene(environment: list):
         x, y, width, height, theta = OBSTACLE
         
         OBSTACLE_RECTAGNGLE = PTCHS.Rectangle((x, y), width, height, angle = NP.rad2deg(theta), color = '#ff0000', edgecolor = '#ff0000')
+        
+        AXES.add_patch(OBSTACLE_RECTAGNGLE)
+    
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
+    AXES.set_ylim(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
+    
+    PLT.title(f'Randomly generated environment: {len(environment)} obstacles')
+    
+    PLT.show()
