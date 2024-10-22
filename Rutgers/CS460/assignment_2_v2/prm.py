@@ -429,16 +429,16 @@ def visualize_roadmap(samples, obstacles, roadmap, path=None, robot_type='freeBo
                 ax.plot([x, nx], [y, ny], color='blue', lw=0.5, alpha = 0.5)
 
     # Plot the path if available
-    if path:
-        for i in range(len(path) - 1):
-            if robot_type == 'arm':
-                base_1, joint1_1, end_effector_1 = calculate_arm_positions(path[i][0], path[i][1])
-                base_2, joint1_2, end_effector_2 = calculate_arm_positions(path[i + 1][0], path[i + 1][1])
-                ax.plot([end_effector_1[0], end_effector_2[0]], [end_effector_1[1], end_effector_2[1]], color='red', lw=2)
-            else:
-                x1, y1, _ = path[i]
-                x2, y2, _ = path[i + 1]
-                ax.plot([x1, x2], [y1, y2], color='red', lw=2)
+    # if path:
+    #     for i in range(len(path) - 1):
+    #         if robot_type == 'arm':
+    #             base_1, joint1_1, end_effector_1 = calculate_arm_positions(path[i][0], path[i][1])
+    #             base_2, joint1_2, end_effector_2 = calculate_arm_positions(path[i + 1][0], path[i + 1][1])
+    #             ax.plot([end_effector_1[0], end_effector_2[0]], [end_effector_1[1], end_effector_2[1]], color='red', lw=2)
+    #         else:
+    #             x1, y1, _ = path[i]
+    #             x2, y2, _ = path[i + 1]
+    #             ax.plot([x1, x2], [y1, y2], color='red', lw=2)
 
     ax.set_xlim(-20, 20)
     ax.set_ylim(-20, 20)
@@ -470,8 +470,8 @@ def main():
     obstacles = load_obstacles(args.map)
 
     # Generate random samples in free space
-    num_samples = 750  # You can adjust this
-    k = 6 # Number of nearest neighbors
+    num_samples = 250  # You can adjust this
+    k = 3 # Number of nearest neighbors
     width, height = 20, 20  # Environment dimensions
 
     start_config = tuple(args.start)
