@@ -81,3 +81,16 @@ def scene_from_file(filename: str) -> list:
     print(f'\tEnvironment loaded from FILE <{filename}>.')
     
     return OBSTACLES
+
+"""
+    function visualize_scene(environment: list):
+"""
+def visualize_scene(environment: list):
+    print(f'\nvisualize_scene() called...')
+    
+    FIGURE, AXES = PLT.subplots()
+    
+    for OBSTACLE in environment:
+        x, y, width, height, theta = OBSTACLE
+        
+        OBSTACLE_RECTAGNGLE = PTCHS.Rectangle((x, y), width, height, angle = NP.rad2deg(theta), color = '#ff0000', edgecolor = '#ff0000')
