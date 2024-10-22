@@ -39,3 +39,16 @@ def generate_environment(number_of_obstacles: int) -> list:
     print(f'\tenvironment generation successfully complete.')
     
     return OBSTACLES
+
+"""
+    function scene_to_file(environment: list, filename: str):
+"""
+def scene_to_file(environment: list, filename: str):
+    print(f'\nscene_to_file({filename}) called...')
+    
+    with open(filename, 'w') as FILE:
+        for OBSTCALE in environment:
+            FILE.write(f'{OBSTCALE[0]}, {OBSTCALE[1]}, {OBSTCALE[2]}, {OBSTCALE[3]}, {OBSTCALE[4]}\n')
+    
+    time.sleep(2)
+    print(f'\tEnvironment saved to FILE <{filename}>.')
