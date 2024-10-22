@@ -11,7 +11,7 @@ import matplotlib.pyplot as PLT
 import matplotlib.patches as PTCHS
 import numpy as NP
 import random as RANDOM
-import time
+import time as TIME
 
 # CONSTANTS
 ENVIRONMENT_WIDTH_MIN = -10.0
@@ -42,7 +42,7 @@ def generate_environment(number_of_obstacles: int) -> list:
         
         OBSTACLES.append(OBSTACLE)
     
-    time.sleep(2)
+    TIME.sleep(2)
     print(f'\tenvironment generation successfully complete.')
     
     return OBSTACLES
@@ -57,7 +57,7 @@ def scene_to_file(environment: list, filename: str):
         for OBSTCALE in environment:
             FILE.write(f'{OBSTCALE[0]}, {OBSTCALE[1]}, {OBSTCALE[2]}, {OBSTCALE[3]}, {OBSTCALE[4]}\n')
     
-    time.sleep(2)
+    TIME.sleep(2)
     print(f'\tEnvironment saved to FILE <{filename}>.')
     
 """
@@ -84,7 +84,7 @@ def scene_from_file(filename: str) -> list:
             
             OBSTACLES.append(OBSTACLE)
     
-    time.sleep(2)
+    TIME.sleep(2)
     print(f'\tEnvironment loaded from FILE <{filename}>.')
     
     return OBSTACLES

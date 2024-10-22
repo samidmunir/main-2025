@@ -7,6 +7,7 @@
         - component_1.py
     
     2. Nearest neighbors with linear search approach
+        - nearest_neighbors.py
     
     3. Collision checking
     
