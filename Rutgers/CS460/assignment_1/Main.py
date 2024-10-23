@@ -171,7 +171,7 @@ def test_component_iv():
     visualize_arm_path(path)
     
     # print('\n\ttesting function forward_propagate_arm() + visualize_arm_path()')
-    # start_pose = (0, 0)
+    start_pose = (0, 0)
     # """
     # plan = [
     #     (np.array([0.0, np.pi / 4]), 5),
@@ -192,20 +192,20 @@ def test_component_iv():
     #     ([0.1, 0.0], 6)
     # ]
     # """
-    # plan = [
-    #     (np.array([0.1, 0.05]), 5),
-    #     (np.array([0.1, 0.05]), 5),
-    #     (np.array([0.1, 0.05]), 5),
-    #     (np.array([-0.1, -0.05]), 5),
-    #     (np.array([-0.1, -0.05]), 5),
-    #     (np.array([-0.1, -0.05]), 5),
-    #     (np.array([-0.1, -0.05]), 5),
-    #     (np.array([-0.1, -0.05]), 5),
-    #     (np.array([-0.1, -0.05]), 5),
-    #     (np.array([-0.1, -0.05]), 5),
-    # ]
-    # path = forward_propagate_arm(start_pose, plan)
-    # visualize_arm_path(path)
+    plan = [
+        (np.array([0.1, 0.05]), 5),
+        (np.array([0.1, 0.05]), 5),
+        (np.array([0.1, 0.05]), 5),
+        (np.array([-0.1, -0.05]), 5),
+        (np.array([-0.1, -0.05]), 5),
+        (np.array([-0.1, -0.05]), 5),
+        (np.array([-0.1, -0.05]), 5),
+        (np.array([-0.1, -0.05]), 5),
+        (np.array([-0.1, -0.05]), 5),
+        (np.array([-0.1, -0.05]), 5),
+    ]
+    path = forward_propagate_arm(start_pose, plan)
+    visualize_arm_path(path)
     
 
 # test_component_i()

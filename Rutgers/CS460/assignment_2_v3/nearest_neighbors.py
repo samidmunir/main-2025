@@ -93,7 +93,7 @@ def visualize_scene_freeBody_robot(configs: list, k_nearest_configs: list, targe
     function load_sample_freeBody_configs(filename: str) -> list:
 """
 def load_sample_freeBody_configs(filename: str) -> list:
-    print(f'\nload_sample_freeBody_configs({filename}) called...')
+    # print(f'\nload_sample_freeBody_configs({filename}) called...')
     
     CONFIGS = []
     
@@ -109,8 +109,8 @@ def load_sample_freeBody_configs(filename: str) -> list:
             
             CONFIGS.append(CONFIG)
     
-    TIME.sleep(2)
-    print(f'\tSample free body configurations loaded from FILE <{filename}>.')
+    # TIME.sleep(2)
+    # print(f'\tSample free body configurations loaded from FILE <{filename}>.')
     
     return CONFIGS
 
@@ -132,7 +132,6 @@ def get_k_nearest_arm_robot_configurations(configs, target_config, k: int):
     TARGET_BASE, TARGET_JOINT, TARGET_END_EFFECTOR = get_arm_robot_joint_positions(target_config[0], target_config[1])
     
     for CONFIG in configs:
-        print(len(CONFIG))
         END_EFFECTOR = CONFIG[4]
         EUCLIDEAN_DIST = get_euclidean_distance(END_EFFECTOR, TARGET_END_EFFECTOR)
         CONFIGS_DISTS.append((CONFIG, EUCLIDEAN_DIST))

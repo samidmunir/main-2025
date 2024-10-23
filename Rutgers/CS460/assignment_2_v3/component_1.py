@@ -1,9 +1,9 @@
 """
     1. Generating environments: component_1.py
         - function generate_environment(number_of_obstacles: int) -> list:
-        - function scene_to_file(environment: list, filename: str):
+        - function scene_to_file(environment: list, filename: str) -> None:
         - function scene_from_file(filename: str) -> list:
-        - function visualize_scene(environment: list):
+        - function visualize_scene(environment: list) -> None:
 """
 
 # IMPORTS
@@ -48,9 +48,9 @@ def generate_environment(number_of_obstacles: int) -> list:
     return OBSTACLES
 
 """
-    function scene_to_file(environment: list, filename: str):
+    function scene_to_file(environment: list, filename: str) -> None:
 """
-def scene_to_file(environment: list, filename: str):
+def scene_to_file(environment: list, filename: str) -> None:
     print(f'\nscene_to_file({filename}) called...')
     
     with open(filename, 'w') as FILE:
@@ -92,7 +92,7 @@ def scene_from_file(filename: str) -> list:
 """
     function visualize_scene(environment: list):
 """
-def visualize_scene(environment: list):
+def visualize_scene(environment: list) -> None:
     print(f'\nvisualize_scene() called...')
     
     FIGURE, AXES = PLT.subplots()

@@ -233,8 +233,8 @@ def scene_from_file(filename: str) -> list:
             
             OBSTACLES.append(OBSTACLE)
     
-    TIME.sleep(2)
-    print(f'\tEnvironment loaded from FILE <{filename}>.')
+    # TIME.sleep(2)
+    # print(f'\tEnvironment loaded from FILE <{filename}>.')
     
     return OBSTACLES
 
