@@ -3,6 +3,10 @@
     - utils.py
         * CONSTANTS
         > function get_polygon_corners(center: (float, float), width: float, height: float, theta: float) -> NP.ndarray:)
+        > function get_arm_robot_joint_positions(theta_1: float, theta_2: float) -> tuple:
+        > function load_sample_arm_robot_configurations(filename: str) -> list:
+        > function get_euclidean_distance(point, target_point) -> float:
+        > function get_k_nearest_arm_robot_configurations(configurations, target_configuration) -> list:
 """
 
 # IMPORTS
@@ -74,3 +78,49 @@ def get_arm_robot_joint_positions(theta_1: float, theta_2: float) -> tuple:
     - call utility function get_arm_robot_joint_positions(theta_1: float, theta_2: float)
 """
 def load_sample_arm_robot_configurations(filename: str) -> list:
+    CONFIGURATIONS = []
+    
+    with open(filename, 'r') as FILE:
+        LINES = FILE.readlines()
+        
+        for LINE in LINES:
+            VALUES = LINE.strip().split()
+            THETA_1, THETA_2 = VALUES
+            THETA_1, THETA_2 = float(THETA_1), float(THETA_2)
+            BASE, JOINT, END_EFFECTOR = get_arm_robot_joint_positions(theta_1 = THETA_1, theta_2 = THETA_2)
+
+            CONFIGURATIONS.append((THETA_1, THETA_2, BASE, JOINT, END_EFFECTOR))
+    
+    return CONFIGURATIONS
+
+"""
+    function get_euclidean_distance(point, target_point) -> float:
+    - this function calculates the Euclidean distance between two points (x, y).
+"""
+def get_euclidean_distance(point, target_point) -> float:
+    EUCLIDEAN_DIST = NP.sqrt((point[0] - target_point[0]) ** 2 + (point[1] - target_point[1]) ** 2)
+    
+    return EUCLIDEAN_DIST
+
+"""
+    function get_k_nearest_arm_robot_configurations(configs, target_configuration) -> list:
+    - this function finds the k nearest configurations to the target configuration in the list of configurations using the position of the end-effector (x, y).
+"""
+def get_k_nearest_arm_robot_configurations(configurations, target_configuration, k: int) -> list:
+    
+    CONFIGS_DISTS = []
+    
+    TARGET_BASE, TARGET_JOINT, TARGET_END_EFFECTOR = get_arm_robot_joint_positions(target_configuration[0], target_configuration[1])
+    
+    for CONFIG in configurations:
+        END_EFFECTOR = CONFIG[4]
+        EUCLIDEAN_DIST = get_euclidean_distance(point = END_EFFECTOR, target_point = TARGET_END_EFFECTOR)
+        CONFIGS_DISTS.append((CONFIG, EUCLIDEAN_DIST))
+    
+    CONFIGS_DISTS.sort(key = lambda EUC_DIST: EUC_DIST[1])
+    
+    SORTED_END_EFFECTOR_POSITIONS = sorted(configurations)
+    
+    K_NEAREST_CONFIGS = CONFIGS_DISTS[:k]
+    
+    return K_NEAREST_CONFIGS

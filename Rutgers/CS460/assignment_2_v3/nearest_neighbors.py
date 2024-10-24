@@ -9,6 +9,11 @@ import argparse as ARGPRS
 import math as MATH
 import numpy as NP
 
+from utils import (
+    load_sample_arm_robot_configurations,
+    get_k_nearest_arm_robot_configurations
+)
+
 """
     function parse_arguments() -> dict:
 """
@@ -34,7 +39,8 @@ def main() -> None:
     ARGS = parse_arguments()
     
     if ARGS.robot == 'arm':
-        print('*** Not yet supported ***')
+        CONFIGURATIONS = load_sample_arm_robot_configurations(filename = ARGS.configs)
+        K_NEAREST_CONFIGURATIONS = get_k_nearest_arm_robot_configurations(configurations = CONFIGURATIONS, target_configuration = ARGS.target, k = ARGS.k)
     elif ARGS.robot == 'freeBody':
         print('*** Not yet supported ***')
 
