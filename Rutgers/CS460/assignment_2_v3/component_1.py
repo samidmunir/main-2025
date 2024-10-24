@@ -8,6 +8,12 @@
 
 # IMPORTS
 from utils import (
+    ENVIRONMENT_WIDTH_MIN,
+    ENVIRONMENT_WIDTH_MAX,
+    ENVIRONMENT_HEIGHT_MIN,
+    ENVIRONMENT_HEIGHT_MAX,
+    OBSTACLE_MIN_SIZE,
+    OBSTACLE_MAX_SIZE,
     get_polygon_corners,
 )
 
@@ -16,15 +22,6 @@ import matplotlib.patches as PTCHS
 import numpy as NP
 import random as RANDOM
 import time as TIME
-
-# CONSTANTS
-ENVIRONMENT_WIDTH_MIN = -10.0
-ENVIRONMENT_WIDTH_MAX = 10.0
-ENVIRONMENT_HEIGHT_MIN = -10.0
-ENVIRONMENT_HEIGHT_MAX = 10.0
-
-OBSTACLE_MIN_SIZE = 0.5
-OBSTACLE_MAX_SIZE = 2.0
 
 """
     function generate_environment(number_of_obstacles: int) -> list:

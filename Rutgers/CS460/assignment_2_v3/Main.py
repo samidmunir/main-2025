@@ -56,6 +56,7 @@ from component_1 import (
 """
 def test_component_i(number_of_environments: int, initial_number_of_obstacles: int, number_of_obstacles_step_size: int):
     print('\ntest_component_i() called...')
+    print('\t1. Generating environments\n')
     
     number_of_obstacles = initial_number_of_obstacles
     
