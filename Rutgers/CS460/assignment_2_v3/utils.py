@@ -10,6 +10,7 @@
 """
 
 # IMPORTS
+import matplotlib.pyplot as PLT
 import numpy as NP
 
 # CONSTANTS
@@ -124,3 +125,46 @@ def get_k_nearest_arm_robot_configurations(configurations, target_configuration,
     K_NEAREST_CONFIGS = CONFIGS_DISTS[:k]
     
     return K_NEAREST_CONFIGS
+
+"""
+    function handle_arm_robot_visualization(figure, axes, configuration: tuple, joint_color: str, line_color: str) -> None:
+    - this function handles the drawing process of the 2-link/2-arm robot.
+"""
+def handle_arm_robot_visualization(figure, axes, configuration: tuple, joint_color: str, line_color: str) -> None:
+    
+    THETA_1, THETA_2, BASE, JOINT, END_EFFECTOR = configuration
+    
+    axes.plot([BASE[0], JOINT[0]], [BASE[1], JOINT[1]], marker = 'o', color = line_color, linewidth = 1.0)
+    axes.plot([JOINT[0], END_EFFECTOR[0]], [JOINT[1], END_EFFECTOR[1]], marker = 'o', color = line_color, linewidth = 1.0)
+    
+    axes.plot(BASE[0], BASE[1], marker = 'o', color = joint_color, label = 'Base')
+    axes.plot(JOINT[0], JOINT[1], marker = 'o', color = joint_color, label = 'Joint')
+    axes.plot(END_EFFECTOR[0], END_EFFECTOR[1], marker = 'o', color = joint_color, label = 'End-effector')
+
+"""
+    function visualize_knn_scene_arm_robot(configurations: list) -> None:
+    - this function handles the primary visualization fot the target configuration, the list of all configurations, and the k-nearest configurations.
+"""
+def visualize_knn_scene_arm_robot(configurations: list, k_nearest_configurations: list, target_configuration: tuple) -> None:
+    FIGURE, AXES = PLT.subplots()
+    
+    for CONFIG in configurations:
+        handle_arm_robot_visualization(figure = FIGURE, axes = AXES, configuration = CONFIG, line_color = '#000000', joint_color = '#000000')
+        
+    for CONFIG in k_nearest_configurations:
+        handle_arm_robot_visualization(figure = FIGURE, axes = AXES, configuration = CONFIG[0], line_color = '#00ffff', joint_color = '#00ffff')
+
+    TARGET_BASE, TARGET_JOINT, TARGET_END_EFFECTOR = get_arm_robot_joint_positions(theta_1 = target_configuration[0], theta_2 = target_configuration[1])
+    target_configuration = (target_configuration[0], target_configuration[1], TARGET_BASE, TARGET_JOINT, TARGET_END_EFFECTOR)
+    
+    handle_arm_robot_visualization(figure = FIGURE, axes = AXES, configuration = target_configuration, line_color = '#00ff00', joint_color = '#00ff00')
+    
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
+    AXES.set_ylim(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
+    
+    PLT.title('Arm robot configurations')
+    
+    # TODO: add legend to display/plot.
+    
+    PLT.show()

@@ -11,7 +11,8 @@ import numpy as NP
 
 from utils import (
     load_sample_arm_robot_configurations,
-    get_k_nearest_arm_robot_configurations
+    get_k_nearest_arm_robot_configurations,
+    visualize_knn_scene_arm_robot
 )
 
 """
@@ -41,6 +42,7 @@ def main() -> None:
     if ARGS.robot == 'arm':
         CONFIGURATIONS = load_sample_arm_robot_configurations(filename = ARGS.configs)
         K_NEAREST_CONFIGURATIONS = get_k_nearest_arm_robot_configurations(configurations = CONFIGURATIONS, target_configuration = ARGS.target, k = ARGS.k)
+        visualize_knn_scene_arm_robot(configurations = CONFIGURATIONS, k_nearest_configurations = K_NEAREST_CONFIGURATIONS,target_configuration = ARGS.target)
     elif ARGS.robot == 'freeBody':
         print('*** Not yet supported ***')
 
