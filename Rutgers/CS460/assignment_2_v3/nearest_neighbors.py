@@ -12,7 +12,10 @@ import numpy as NP
 from utils import (
     load_sample_arm_robot_configurations,
     get_k_nearest_arm_robot_configurations,
-    visualize_knn_scene_arm_robot
+    visualize_knn_scene_arm_robot,
+    load_sample_free_body_robot_configurations,
+    get_k_nearest_free_body_robot_configurations,
+    visualize_knn_scene_free_body_robot
 )
 
 """
@@ -44,7 +47,9 @@ def main() -> None:
         K_NEAREST_CONFIGURATIONS = get_k_nearest_arm_robot_configurations(configurations = CONFIGURATIONS, target_configuration = ARGS.target, k = ARGS.k)
         visualize_knn_scene_arm_robot(configurations = CONFIGURATIONS, k_nearest_configurations = K_NEAREST_CONFIGURATIONS,target_configuration = ARGS.target)
     elif ARGS.robot == 'freeBody':
-        print('*** Not yet supported ***')
+        CONFIGURATIONS = load_sample_free_body_robot_configurations(filename = ARGS.configs)
+        K_NEAREST_CONFIGURATIONS = get_k_nearest_free_body_robot_configurations(configurations = CONFIGURATIONS, target_configuration = ARGS.target, orientation_weight = 0.25, k = ARGS.k)
+        visualize_knn_scene_free_body_robot(configurations = CONFIGURATIONS, k_nearest_configurations = K_NEAREST_CONFIGURATIONS, target_configuration = ARGS.target)
 
 if __name__ == '__main__':
     main()

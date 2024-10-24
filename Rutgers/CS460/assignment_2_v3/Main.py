@@ -12,9 +12,9 @@
         - nearest_neighbors.py: *** COMPLETE ***
         - test scripts:
             > python3 nearest_neighbors.py --robot arm --target 0.0 0.0 -k 3 --configs sample_arm_robot_configs_i.txt (arm robot)
-            > python3 nearest_neighbors.py --robot arm --target 0.0 0.0 -k 3 --configs sample_arm_robot_configs_ii.txt (arm robot)
+            > python3 nearest_neighbors.py --robot arm --target 2.5 2.5 -k 3 --configs sample_arm_robot_configs_ii.txt (arm robot)
             > python3 nearest_neighbors.py --robot freeBody --target 0.0 0.0 0.0 -k 3 --configs sample_freeBody_robot_configs_i.txt (freeBody robot)
-            > python3 nearest_neighbors.py --robot freeBody --target 0.0 0.0 0.0 -k 3 --configs sample_freeBody_robot_configs_ii.txt (freeBody robot)
+            > python3 nearest_neighbors.py --robot freeBody --target 8.0 8.0 3.57 -k 3 --configs sample_freeBody_robot_configs_ii.txt (freeBody robot)
     
     3. Collision checking
         - collision_checking.py: *** COMPLETE ***

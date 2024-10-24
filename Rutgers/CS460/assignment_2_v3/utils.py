@@ -3,14 +3,33 @@
     - utils.py
         * CONSTANTS
         > function get_polygon_corners(center: (float, float), width: float, height: float, theta: float) -> NP.ndarray:)
+        
         > function get_arm_robot_joint_positions(theta_1: float, theta_2: float) -> tuple:
+        
         > function load_sample_arm_robot_configurations(filename: str) -> list:
+        
         > function get_euclidean_distance(point, target_point) -> float:
-        > function get_k_nearest_arm_robot_configurations(configurations, target_configuration) -> list:
+        
+        > function get_knn_nearest_arm_robot_configurations(configurations, target_configuration) -> list:
+        
+        > function handle_arm_robot_visualization(figure, axes, configuration:
+        
+        > function visualize_knn_scene_arm_robot(configurations: list) -> None:
+        
+        > function load_sample_free_body_robot_configurations(filename: str) -> list:
+        
+        > function get_angular_difference(theta_1, theta_2) -> float:
+        
+        > funcion get_k_nearest_free_body_robot_configurations(configurations: list, target_configuration: tuple, orientation_weight: float, k: int) -> list:
+        
+        > function handle_free_body_robot_visualization(figure, axes, configuration: tuple) -> None:
+        
+        > function visualize_knn_scene_free_body_robot():
 """
 
 # IMPORTS
 import matplotlib.pyplot as PLT
+import matplotlib.patches as PTCHS
 import numpy as NP
 
 # CONSTANTS
@@ -77,6 +96,7 @@ def get_arm_robot_joint_positions(theta_1: float, theta_2: float) -> tuple:
     - we want to store the configuration of each arm-robot as a tuple of the following form: (theta_1, theta_2, BASE, JOINT, END_EFFECTOR).
     - we will compute the BASE, JOINT, END_EFFECTOR positions (x, y) given the two angles theta_1 & theta_2 and (the length of the links as constants).
     - call utility function get_arm_robot_joint_positions(theta_1: float, theta_2: float)
+    - return the list of configurations.
 """
 def load_sample_arm_robot_configurations(filename: str) -> list:
     CONFIGURATIONS = []
@@ -166,5 +186,96 @@ def visualize_knn_scene_arm_robot(configurations: list, k_nearest_configurations
     PLT.title('Arm robot configurations')
     
     # TODO: add legend to display/plot.
+    
+    PLT.show()
+    
+"""
+    function load_sample_free_body_robot_configurations(filename: str) -> list:
+    - this function loads in a list of free-body-robot configurations from the file specified by filename.
+    - we want to store the configuration of each arm-robot as a tuple of the following form: (x, y, theta).
+    - return the list of free-body-robot configurations.
+"""
+def load_sample_free_body_robot_configurations(filename: str) -> list:
+    print(f'\nload_sample_freeBody_configs({filename}) called...')
+    
+    CONFIGURATIONS = []
+    
+    with open(filename, 'r') as FILE:
+        LINES = FILE.readlines()
+        
+        for LINE in LINES:
+            VALUES = LINE.strip().split()
+            x, y, theta = VALUES[0], VALUES[1], VALUES[2]
+            
+            CONFIGURATION = (float(x), float(y), float(theta))
+            
+            CONFIGURATIONS.append(CONFIGURATION)
+    
+    print(f'\tsample free body configurations loaded from FILE <{filename}>.')
+    
+    return CONFIGURATIONS
+
+"""
+    function get_angular_difference(theta_1, theta_2) -> float:
+    - this function calculates the angular difference between two angles, taking into account the periodicity of the angle.
+"""
+def get_angular_difference(theta_1: float, theta_2: float) -> float:
+    ANGR_DIFF = NP.abs(theta_1 - theta_2) % (2 * NP.pi)
+    
+    return min(ANGR_DIFF, 2 * NP.pi - ANGR_DIFF)
+
+"""
+    funcion get_k_nearest_free_body_robot_configurations(configurations: list, target_configuration: tuple, orientation_weight: float, k: int) -> list:
+    - this function finds the k nearest configurations to the target configuration in the list of configurations using the position of the center of the robot and its orientation (angle).
+"""
+def get_k_nearest_free_body_robot_configurations(configurations: list, target_configuration: tuple, orientation_weight: float, k: int) -> list:
+    CONFIGURATION_DISTANCES = []
+    
+    TARGET_X, TARGET_Y, TARGET_THETA = target_configuration
+    
+    for CONFIGURATION in configurations:
+        CONFIG_DIST = get_euclidean_distance((CONFIGURATION[0], CONFIGURATION[1]), (TARGET_X, TARGET_Y)) + orientation_weight * get_angular_difference(CONFIGURATION[2], TARGET_THETA)
+    
+        CONFIGURATION_DISTANCES.append((CONFIGURATION, CONFIG_DIST))
+    
+    CONFIGURATION_DISTANCES.sort(key = lambda W_DIST: W_DIST[1])
+    K_NEAREST_CONFIGS = CONFIGURATION_DISTANCES[:k]
+    
+    return K_NEAREST_CONFIGS
+
+"""
+    function handle_free_body_robot_visualization(figure, axes, configuration: tuple) -> None:
+    - this function handles drawing/visualization of the free-body robot.
+"""
+def handle_free_body_robot_visualization(figure, axes, configuration: tuple, edge_color: str, fill_color: str) -> None:
+    FIGURE = figure
+    AXES = axes
+    
+    x, y, theta = configuration
+    
+    ROBOT_RECTANGLE = PTCHS.Rectangle((x, y), FREE_BODY_ROBOT_WIDTH, FREE_BODY_ROBOT_HEIGHT, angle = NP.rad2deg(theta), color = fill_color, edgecolor = edge_color, linewidth = 1.0, alpha = 0.75)
+    
+    AXES.add_patch(ROBOT_RECTANGLE)
+    
+"""
+    function visualize_knn_scene_free_body_robot():
+    - this function handles the visualization of the target configuration, the list of configurations, and the k-nearest configurations.
+"""
+def visualize_knn_scene_free_body_robot(configurations: list, k_nearest_configurations: list, target_configuration: tuple) -> None:
+    FIGURE, AXES = PLT.subplots()
+    
+    for CONFIG in configurations:
+        handle_free_body_robot_visualization(figure = FIGURE, axes = AXES, configuration = CONFIG, edge_color = '#000000', fill_color = '#000000')
+    
+    for CONFIG in k_nearest_configurations:
+        handle_free_body_robot_visualization(figure = FIGURE, axes = AXES, configuration = CONFIG[0], edge_color = '#0000ff', fill_color = '#0000ff')
+        
+    handle_free_body_robot_visualization(figure = FIGURE, axes = AXES, configuration = target_configuration, edge_color = '#00ff00', fill_color = '#00ff00')
+    
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
+    AXES.set_ylim(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
+    
+    PLT.title('Free-body robot configurations')
     
     PLT.show()
