@@ -74,13 +74,10 @@ def scene_to_file(environment: list, filename: str) -> None:
     print(f'\tenvironment saved to FILE <{filename}>.')
     
 """
-    function scene_from_file(filename: str) -> list:
-"""
-"""
-    function scene_to_file(environment: list, filename: str) -> None:
+    function scene_from_file(environment: list, filename: str) -> None:
     - this function loads in the environment as described in the file referred to by filename.
     - we expect each line to contain a tuple containing the obstacle's configuration.
-    - 
+    - we will store each obstacle configuration in the environment list and return it.
 """
 def scene_from_file(filename: str) -> list:
     print(f'\nscene_from_file({filename}) called...')
@@ -98,13 +95,17 @@ def scene_from_file(filename: str) -> list:
             width = float(VALUES[2])
             height = float(VALUES[3])
             theta = float(VALUES[4])
+            c1 = float(VALUES[5])
+            c2 = float(VALUES[6])
+            c3 = float(VALUES[7])
+            c4 = float(VALUES[8])
             
-            OBSTACLE = (x, y, width, height, theta)
+            OBSTACLE = (x, y, width, height, theta, c1, c2, c3, c4)
             
             OBSTACLES.append(OBSTACLE)
     
     TIME.sleep(2)
-    print(f'\tEnvironment loaded from FILE <{filename}>.')
+    print(f'\tenvironment loaded from FILE <{filename}>.')
     
     return OBSTACLES
 
