@@ -24,9 +24,9 @@ from nearest_neighbors import (
 )
 
 from collision_checking import (
-    JOINT_RADIUS,
     FREE_BODY_ROBOT_WIDTH,
     FREE_BODY_ROBOT_HEIGHT,
+    JOINT_RADIUS,
     is_colliding,
     get_polygon_corners,
     is_colliding_link,
@@ -64,9 +64,7 @@ def euclidean_distance(node_1: tuple, node_2: tuple) -> float:
     return EUC_DIST
 
 """
-    function a_star_search(prm_graph: dict, start: tuple, goal: tuple) -> list
-    - Perform A* search to find the shortest path from start to goal.
-    - Returns the path as a list of configurations.
+    function a_star_search(prm_graph: dict, start: tuple, goal: tuple) -> list:
 """
 def a_star_search(prm_graph: dict, start: tuple, goal: tuple) -> list:
     # Ensure start and goal nodes are properly formatted as tuples
@@ -92,6 +90,18 @@ def a_star_search(prm_graph: dict, start: tuple, goal: tuple) -> list:
         if current == goal:
             return reconstruct_path(came_from, current)
 
+        """
+            function reconstruct_path(came_from: dict, current: tuple) -> list
+            - Reconstruct the path from the goal to the start.
+        """
+        def reconstruct_path(came_from: dict, current: tuple) -> list:
+            path = [current]
+            while came_from[current] is not None:
+                current = came_from[current]
+                path.append(current)
+            return path[::-1]  # Reverse the path to go from start to goal
+
+
         # Explore neighbors of the current node
         for neighbor in prm_graph.get(current, []):
             neighbor = neighbor[0]  # Extract the configuration tuple from neighbor list
@@ -109,10 +119,6 @@ def a_star_search(prm_graph: dict, start: tuple, goal: tuple) -> list:
     # If no path is found, return an empty list
     return []
 
-"""
-    function visualize_path(path: list, environment: list)
-    - Visualize the PRM graph with the solution path highlighted.
-"""
 def visualize_path(path: list, prm_graph: dict, environment: list):
     fig, ax = PLT.subplots()
 
@@ -144,7 +150,7 @@ def visualize_path(path: list, prm_graph: dict, environment: list):
     PLT.show()
 
 """
-    function is_edge_collision_free(start, end, obstacles) -> bool:
+    function is_edge_collision_free(start: tuple, end: tuple, obstacles: list) -> bool:
 """
 def is_edge_collision_free(start: tuple, end: tuple, obstacles: list) -> bool:
     NUM_STEPS = 10 # number of points to interpolate along the edge.
@@ -196,11 +202,11 @@ def visualize_freeBody_PRM(prm: dict, environment: list) -> None:
     PLT.show()
 
 """
-    function generate_freeBody_robot_sample_configurations(number_of_samples: int) -> list
+    function generate_freeBody_robot_sample_configurations(number_of_samples: int, start: tuple, goal: tuple) -> list
 """
 def generate_freeBody_robot_sample_configurations(number_of_samples: int, start: tuple, goal: tuple) -> list:
     SAMPLES = []
-    SAMPLES = SAMPLES + [start, goal]
+    SAMPLES = SAMPLES + [start]
     for _ in range(number_of_samples):
         x = RANDOM.uniform(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
         y = RANDOM.uniform(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
@@ -208,12 +214,14 @@ def generate_freeBody_robot_sample_configurations(number_of_samples: int, start:
         
         SAMPLES.append((x, y, theta))
     
+    SAMPLES = SAMPLES + [goal]
+    
     return SAMPLES
 
 """
     function build_prm(robot_type: str, samples: list, environment: list) -> dict:
 """
-def build_prm(robot_type: str, samples: list, environment: list, start: tuple, goal: tuple) -> dict:
+def build_prm(robot_type: str, samples: list, environment: list) -> dict:
     PRM = {SAMPLE: [] for SAMPLE in samples}
     
     # samples = samples + [start, goal]
@@ -238,6 +246,9 @@ def build_prm(robot_type: str, samples: list, environment: list, start: tuple, g
                         
     return PRM
 
+"""
+    function interpolate_path(path: list, steps_per_segment: int) -> list:
+"""
 def interpolate_path(path, steps_per_segment=10):
     """Interpolate positions and angles between consecutive path points."""
     interpolated_path = []
@@ -255,6 +266,9 @@ def interpolate_path(path, steps_per_segment=10):
     interpolated_path.append(path[-1])  # Add the final goal point
     return interpolated_path
 
+"""
+    function animate_freeBody_robot(path: list, environment: list, steps_per_segment: int) -> None:
+"""
 def animate_freeBody_robot(path: list, environment: list, steps_per_segment=10):
     """Animate the freeBody robot moving along the given interpolated path."""
     interpolated_path = interpolate_path(path, steps_per_segment)
@@ -325,11 +339,9 @@ def scene_from_file(filename: str) -> list:
     return OBSTACLES
 
 """
-    function parse_arguments()
-    - function to parse command-line arguments.
-    - return arguments object as ARGS
+    function parse_arguments() -> dict:
 """
-def parse_arguments():
+def parse_arguments() -> dict:
     PARSER = ARGPRS.ArgumentParser(description = 'Nearest neighbors with linear search approach.')
     
     PARSER.add_argument('--robot', type = str, choices = ['arm', 'freeBody'], required = True, help = 'Type of robot (arm OR freeBody).')
@@ -344,10 +356,9 @@ def parse_arguments():
 
 """
     function main():
-    - Main function to run the program.
 """
 def main():
-    print('\n3. Collision checking\n')
+    print('\n4. Probabalistic Road-Maps\n')
     
     ARGS = parse_arguments()
     
@@ -363,12 +374,10 @@ def main():
         SAMPLES = generate_arm_robot_sample_configurations(number_of_samples = NUMBER_OF_SAMPLES, start = START, goal = GOAL)
     elif ARGS.robot == 'freeBody':
         SAMPLES = generate_freeBody_robot_sample_configurations(number_of_samples = NUMBER_OF_SAMPLES, start = tuple(ARGS.start), goal = tuple(ARGS.goal))
-        PRM = build_prm(robot_type = 'freeBody', samples = SAMPLES, environment = ENVIRONMENT, start = tuple(ARGS.start), goal = tuple(ARGS.goal))
-        visualize_freeBody_PRM(prm = PRM, environment = ENVIRONMENT)
+        PRM = build_prm(robot_type = 'freeBody', samples = SAMPLES, environment = ENVIRONMENT)
+        # visualize_freeBody_PRM(prm = PRM, environment = ENVIRONMENT)
         PATH = a_star_search(PRM, tuple(ARGS.start), tuple(ARGS.goal))
-        # visualize_path(PATH, PRM, ENVIRONMENT)
-        if PATH:
-            animate_freeBody_robot(path = PATH, environment = ENVIRONMENT)
+        visualize_path(PATH, PRM, environment = ENVIRONMENT)
 
 if __name__ == '__main__':
     main()

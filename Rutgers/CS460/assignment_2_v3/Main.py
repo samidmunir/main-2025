@@ -27,6 +27,7 @@
     4. PRM - Probabalistic road map
         - prm.py
         - test scripts:
+            > python3 prm.py --robot freeBody --start -5.0 -5.0 0.0 --goal 5.0 5.0 4.5 --map environment_1_10.txt (freeBody robot)
     
     5. RRT
     

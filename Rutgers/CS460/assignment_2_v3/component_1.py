@@ -24,28 +24,15 @@ OBSTACLE_MAX_SIZE = 2.0
 
 """
     function generate_environment(number_of_obstacles: int) -> list:
+    - this function will generate a randomized environment with the number of randomized obstacles = number_of_obstacles.
+    - this function returns a list of random obstacles.
+    - each obstacle is a tuple in the form:
+        > (x, y, width, height, theta, corners)
+            * corners are the 4 corners of the obstacle rectangle.
+            * will use utils.get_polygon_corners() to compute corners() tuple.
 """
 def generate_environment(number_of_obstacles: int) -> list:
-    print(f'\ngenerate_environment({number_of_obstacles}) called...')
-    
-    OBSTACLES = []
-    
-    for i in range(number_of_obstacles):
-        
-        x = RANDOM.uniform(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
-        y = RANDOM.uniform(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
-        width = RANDOM.uniform(OBSTACLE_MIN_SIZE, OBSTACLE_MAX_SIZE)
-        height = RANDOM.uniform(OBSTACLE_MIN_SIZE, OBSTACLE_MAX_SIZE)
-        theta = RANDOM.uniform(0, (2 * NP.pi))
-        
-        OBSTACLE = (x, y, width, height, theta)
-        
-        OBSTACLES.append(OBSTACLE)
-    
-    TIME.sleep(2)
-    print(f'\tenvironment generation successfully complete.')
-    
-    return OBSTACLES
+    pass
 
 """
     function scene_to_file(environment: list, filename: str) -> None:

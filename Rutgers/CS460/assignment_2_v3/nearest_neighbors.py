@@ -231,8 +231,6 @@ def load_sample_arm_robot_configs(filename: str) -> list:
 
 """
     function parse_arguments()
-    - function to parse command-line arguments.
-    - return arguments object as ARGS
 """
 def parse_arguments():
     PARSER = ARGPRS.ArgumentParser(description = 'Nearest neighbors with linear search approach.')
@@ -249,7 +247,6 @@ def parse_arguments():
 
 """
     function main():
-    - Main function to run the program.
 """
 def main():
     print('\n2. Nearest neighbors with linear search approach\n')

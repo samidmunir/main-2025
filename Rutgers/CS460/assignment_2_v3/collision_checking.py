@@ -20,7 +20,7 @@ from nearest_neighbors import (
 )
 
 # CONSTANTS
-JOINT_RADIUS = 0.1
+JOINT_RADIUS = 0.05
 FREE_BODY_ROBOT_WIDTH = 0.5
 FREE_BODY_ROBOT_HEIGHT = 0.3
 
@@ -240,8 +240,6 @@ def scene_from_file(filename: str) -> list:
 
 """
     function parse_arguments()
-    - function to parse command-line arguments.
-    - return arguments object as ARGS
 """
 def parse_arguments():
     PARSER = ARGPRS.ArgumentParser(description = 'Nearest neighbors with linear search approach.')
