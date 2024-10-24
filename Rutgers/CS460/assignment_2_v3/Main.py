@@ -64,12 +64,12 @@ def test_component_i(number_of_environments: int, initial_number_of_obstacles: i
         
         scene_to_file(environment = ENVIRONMENT, filename = f'environment_{(i + 1)}_{number_of_obstacles}.txt')
         
-    #     visualize_scene(environment = ENVIRONMENT)
+        visualize_scene(environment = ENVIRONMENT)
         
         number_of_obstacles += number_of_obstacles_step_size
     
-    # LOADED_ENVIRONMENT = scene_from_file(filename = 'environment_1_10.txt')
-    # visualize_scene(environment = LOADED_ENVIRONMENT)
+    LOADED_ENVIRONMENT = scene_from_file(filename = 'environment_1_10.txt')
+    visualize_scene(environment = LOADED_ENVIRONMENT)
 
 """
     function main():
