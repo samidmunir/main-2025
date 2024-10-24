@@ -7,6 +7,10 @@
 """
 
 # IMPORTS
+from utils import (
+    get_polygon_corners,
+)
+
 import matplotlib.pyplot as PLT
 import matplotlib.patches as PTCHS
 import numpy as NP
@@ -32,23 +36,51 @@ OBSTACLE_MAX_SIZE = 2.0
             * will use utils.get_polygon_corners() to compute corners() tuple.
 """
 def generate_environment(number_of_obstacles: int) -> list:
-    pass
+    print(f'\ngenerate_environment({number_of_obstacles}) called...')
+    
+    ENVIRONMENT = []
+    
+    for _ in range(number_of_obstacles):
+        x = RANDOM.uniform(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
+        y = RANDOM.uniform(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
+        width = RANDOM.uniform(OBSTACLE_MIN_SIZE, OBSTACLE_MAX_SIZE)
+        height = RANDOM.uniform(OBSTACLE_MIN_SIZE, OBSTACLE_MAX_SIZE)
+        theta = RANDOM.uniform(0, 2 * NP.pi)
+        
+        corners = get_polygon_corners(center = (x, y), width = width, height = height, theta = theta)
+        c1, c2, c3, c4 = corners
+        
+        OBSTACLE = (x, y, width, height, theta, c1, c2, c3, c4)
+        
+        ENVIRONMENT.append(OBSTACLE)
+        
+    print(f'\tsuccessfully generated environment with {number_of_obstacles}.')
+    
+    return ENVIRONMENT
 
 """
     function scene_to_file(environment: list, filename: str) -> None:
+    - this function takes the environment list and stores each obstacle in the file refered to by filename.
+    - each line will contain the configuration tuple.
+        > comma-separated values of obstacle configuration.
 """
 def scene_to_file(environment: list, filename: str) -> None:
     print(f'\nscene_to_file({filename}) called...')
     
     with open(filename, 'w') as FILE:
-        for OBSTCALE in environment:
-            FILE.write(f'{OBSTCALE[0]}, {OBSTCALE[1]}, {OBSTCALE[2]}, {OBSTCALE[3]}, {OBSTCALE[4]}\n')
-    
-    TIME.sleep(2)
-    print(f'\tEnvironment saved to FILE <{filename}>.')
+        for OBSTACLE in environment:
+            FILE.write(f'{OBSTACLE[0]}, {OBSTACLE[1]}, {OBSTACLE[2]}, {OBSTACLE[3]}, {OBSTACLE[4]}, {OBSTACLE[5]}, {OBSTACLE[6]}, {OBSTACLE[7]}, {OBSTACLE[8]}\n')
+
+    print(f'\tenvironment saved to FILE <{filename}>.')
     
 """
     function scene_from_file(filename: str) -> list:
+"""
+"""
+    function scene_to_file(environment: list, filename: str) -> None:
+    - this function loads in the environment as described in the file referred to by filename.
+    - we expect each line to contain a tuple containing the obstacle's configuration.
+    - 
 """
 def scene_from_file(filename: str) -> list:
     print(f'\nscene_from_file({filename}) called...')
@@ -97,4 +129,4 @@ def visualize_scene(environment: list) -> None:
     
     PLT.title(f'Randomly generated environment: {len(environment)} obstacles')
     
-    PLT.show()
+    PLT.show(block = False)
