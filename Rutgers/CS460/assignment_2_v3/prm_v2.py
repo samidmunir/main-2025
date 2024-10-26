@@ -268,6 +268,8 @@ def main():
     if path:
         visualize_path(path, prm, environment)
         animate_freeBody_robot(path, environment)
+    else:
+        print('No path found between the start and goal configurations.')
 
 if __name__ == '__main__':
     main()
