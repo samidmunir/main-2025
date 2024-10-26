@@ -1,9 +1,4 @@
 # IMPORTS
-import matplotlib.pyplot as PLT
-import matplotlib.patches as PTCHS
-import numpy as NP
-
-# CONSTANTS
 ENVIRONMENT_WIDTH_MIN = -10.0
 ENVIRONMENT_WIDTH_MAX = 10.0
 ENVIRONMENT_HEIGHT_MIN = -10.0

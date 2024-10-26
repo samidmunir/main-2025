@@ -42,7 +42,7 @@ def generate_environment(number_of_obstacles: int) -> list:
         y = RANDOM.uniform(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
         width = RANDOM.uniform(OBSTACLE_MIN_SIZE, OBSTACLE_MAX_SIZE)
         height = RANDOM.uniform(OBSTACLE_MIN_SIZE, OBSTACLE_MAX_SIZE)
-        theta = RANDOM.uniform(0, 2 * NP.pi)
+        theta = RANDOM.uniform(0.01746, 2 * NP.pi)
         
         corners = get_polygon_corners(center = (x, y), width = width, height = height, theta = theta)
         c1, c2, c3, c4 = corners
