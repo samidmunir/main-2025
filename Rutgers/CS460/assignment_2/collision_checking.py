@@ -1,200 +1,135 @@
-# import argparse
-# import time
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import matplotlib.patches as patches
+import argparse as ARGPRS
+import matplotlib.pylab as PLT
+import matplotlib.patches as PTCHS
+import numpy as NP
+import random as RANDOM
 
-# # Function to load environment map
-# def load_map(filename):
-#     environment = {"obstacles": []}
-#     with open(filename, 'r') as file:
-#         width, height = map(float, file.readline().split())
-#         environment["width"] = width
-#         environment["height"] = height
-        
-#         for line in file:
-#             x, y, w, h, orientation = map(float, line.split())
-#             obstacle = {
-#                 "center": (x, y),
-#                 "width": w,
-#                 "height": h,
-#                 "orientation": orientation
-#             }
-#             environment["obstacles"].append(obstacle)
+from utils import (
+    ENVIRONMENT_WIDTH_MIN,
+    ENVIRONMENT_WIDTH_MAX,
+    ENVIRONMENT_HEIGHT_MIN,
+    ENVIRONMENT_HEIGHT_MAX,
+    ARM_ROBOT_LINK_1_LENGTH,
+    ARM_ROBOT_LINK_2_LENGTH,
+    JOINT_RADIUS,
+    BASE,
+    FREE_BODY_ROBOT_WIDTH,
+    FREE_BODY_ROBOT_HEIGHT,
+    OBSTACLE_MIN_SIZE,
+    OBSTACLE_MAX_SIZE,
+    project,
+    get_axes,
+    is_colliding,
+    point_in_circle,
+    is_line_intersecting,
+    get_polygon_corners,
+    is_colliding_link,
+    get_arm_robot_forward_kinematics
+)
+
+from gen_env import (
+    scene_from_file
+)
     
-#     return environment
-
-# # Function to generate random poses
-# def generate_random_pose():
-#     x = np.random.uniform(0, 20)
-#     y = np.random.uniform(0, 20)
-#     theta = np.random.uniform(-np.pi, np.pi)
-#     return (x, y, theta)
-
-# # Function to check if a rectangle (robot) collides with any obstacles
-# def check_collision(robot, obstacles):
-#     for obstacle in obstacles:
-#         # Simple collision check logic (bounding box overlap or similar)
-#         # We can use matplotlib's patches for more advanced collision detection if needed
-#         pass
-#     return False  # Return True if collision happens
-
-# # Function to visualize the environment and the robot
-# def visualize_environment(environment, robot_pose, colliding_obstacles):
-#     fig, ax = plt.subplots()
-
-#     # Plot obstacles
-#     for obstacle in environment["obstacles"]:
-#         color = 'green' if obstacle not in colliding_obstacles else 'red'
-#         rect = patches.Rectangle((obstacle['center'][0] - obstacle['width'] / 2, 
-#                                   obstacle['center'][1] - obstacle['height'] / 2),
-#                                   obstacle['width'], obstacle['height'],
-#                                   angle=np.degrees(obstacle['orientation']),
-#                                   edgecolor=color, facecolor='none', lw=2)
-#         ax.add_patch(rect)
-
-#     # Plot the robot (freeBody as a rectangle)
-#     robot = patches.Rectangle((robot_pose[0] - 0.25, robot_pose[1] - 0.15), 0.5, 0.3,
-#                               angle=np.degrees(robot_pose[2]), edgecolor='blue', facecolor='none', lw=2)
-#     ax.add_patch(robot)
-
-#     ax.set_xlim(0, 20)
-#     ax.set_ylim(0, 20)
-#     plt.show()
-
-# def main():
-#     parser = argparse.ArgumentParser(description="Collision Checking")
-#     parser.add_argument('--robot', type=str, required=True, choices=['arm', 'freeBody'],
-#                         help="Type of robot: 'arm' or 'freeBody'")
-#     parser.add_argument('--map', type=str, required=True,
-#                         help="Path to the map file")
-#     args = parser.parse_args()
-
-#     # Load the environment
-#     environment = load_map(args.map)
-
-#     for _ in range(10):  # Spawn robot for 10 seconds (10 poses)
-#         robot_pose = generate_random_pose()
-
-#         # Check for collisions
-#         colliding_obstacles = []
-#         if check_collision(robot_pose, environment["obstacles"]):
-#             colliding_obstacles = [obstacle for obstacle in environment["obstacles"] if check_collision(robot_pose, [obstacle])]
-
-#         # Visualize environment and robot
-#         visualize_environment(environment, robot_pose, colliding_obstacles)
-        
-#         time.sleep(1)  # Wait 1 second before spawning the robot again
-
-# if __name__ == "__main__":
-#     main()
-
-import argparse
-import time
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from shapely.geometry import Polygon
-from shapely.affinity import rotate
-
-# Function to load environment map
-def load_map(filename):
-    environment = {"obstacles": []}
-    with open(filename, 'r') as file:
-        width, height = map(float, file.readline().split())
-        environment["width"] = width
-        environment["height"] = height
-        
-        for line in file:
-            x, y, w, h, orientation = map(float, line.split())
-            obstacle = {
-                "center": (x, y),
-                "width": w,
-                "height": h,
-                "orientation": orientation
-            }
-            environment["obstacles"].append(obstacle)
+def handle_drawing_free_body_robot(FIGURE, AXES, robot_corners, fill_color, line_color):
+    ROBOT_RECTANGLE = PTCHS.Polygon(robot_corners, closed = True, edgecolor = line_color, color = fill_color, fill = True)
     
-    return environment
+    AXES.add_patch(ROBOT_RECTANGLE)
 
-# Function to generate random poses for the robot
-def generate_random_pose():
-    x = np.random.uniform(0, 20)
-    y = np.random.uniform(0, 20)
-    theta = np.random.uniform(-np.pi, np.pi)
-    return (x, y, theta)
+def handle_drawing_arm_robot(FIGURE, AXES, base, joint1, end_effector, joint_color, line_color):
+    # Line from base to joint1
+    AXES.plot([base[0], joint1[0]], [base[1], joint1[1]], marker='o', color=f'{line_color}', label='First Arm Link')
+    # Line from joint1 to end-effector
+    AXES.plot([joint1[0], end_effector[0]], [joint1[1], end_effector[1]], marker='o', color=f'{line_color}', label='Second Arm Link')
 
-# Function to create a rectangle polygon from the center, width, height, and orientation
-def create_rectangle(x, y, width, height, orientation):
-    # Create an axis-aligned rectangle at (x, y) with the given width and height
-    rect = Polygon([(-width / 2, -height / 2), (width / 2, -height / 2),
-                    (width / 2, height / 2), (-width / 2, height / 2)])
+    # Mark the base, joint1, and end-effector
+    AXES.plot(base[0], base[1], marker='o', ms=1.5, color='#000000', label='Base Joint')
+    AXES.plot(joint1[0], joint1[1], marker='o', ms=1.5, color=f'{joint_color}', label='Joint 1')
+    AXES.plot(end_effector[0], end_effector[1], marker='o', ms=1.5, color=f'{joint_color}', label='End Effector')
+
+def visualize_scene_free_body_robot(environment: list, configuration: tuple, iteration: int) -> None:
+    FIGURE, AXES = PLT.subplots()
     
-    # Rotate the rectangle around its center and translate it to (x, y)
-    rotated_rect = rotate(rect, np.degrees(orientation), origin=(0, 0))
-    rotated_rect = Polygon([(point[0] + x, point[1] + y) for point in rotated_rect.exterior.coords])
-    return rotated_rect
+    ROBOT_CORNERS = get_polygon_corners(configuration[:2], configuration[2], FREE_BODY_ROBOT_WIDTH, FREE_BODY_ROBOT_HEIGHT)
+    
+    for OBSTACLE in environment:
+        x, y, width, height, theta = OBSTACLE
+        OBSTACLE_CORNERS = get_polygon_corners(center = (x, y), width = width, height = height, theta = theta)
+        
+        COLLIDING = is_colliding(ROBOT_CORNERS, OBSTACLE_CORNERS)
+        
+        COLOR = '#ff0000' if COLLIDING else '#000000'
+        
+        OBSTACLE_RECTANGLE = PTCHS.Polygon(OBSTACLE_CORNERS, closed = True, edgecolor = COLOR, color = COLOR, fill = True, alpha = 0.5)
+        
+        AXES.add_patch(OBSTACLE_RECTANGLE)
+        
+    handle_drawing_free_body_robot(FIGURE, AXES, ROBOT_CORNERS, '#0000ff', '#0000ff')
+    
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
+    AXES.set_ylim(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
+    
+    PLT.title(f'FreeBody robot collision test (Iteration # {iteration})')
+    PLT.show(block = False)
+    PLT.pause(1)
+    PLT.close(FIGURE)
 
-# Function to check if the robot collides with any obstacles
-def check_collision(robot_pose, obstacles):
-    robot = create_rectangle(robot_pose[0], robot_pose[1], 0.5, 0.3, robot_pose[2])
+def visualize_scene_arm_robot(environment: list, configuration: tuple, iteration: int) -> None:
+    FIGURE, AXES = PLT.subplots()
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
+    AXES.set_ylim(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
+    
+    BASE, JOINT, END_EFFECTOR = get_arm_robot_forward_kinematics(configuration = (configuration[0], configuration[1]))
+    
+    for OBSTACLE in environment:
+        x, y, width, height, theta = OBSTACLE
+        OBSTACLE_CORNERS = get_polygon_corners(center = (x, y), width = width, height = height, theta = theta)
+        
+        COLLIDING = (
+            is_colliding_link(BASE, JOINT, OBSTACLE_CORNERS) or (is_colliding_link(JOINT, END_EFFECTOR, OBSTACLE_CORNERS)) or point_in_circle(BASE, (x, y), JOINT_RADIUS) or point_in_circle(JOINT, (x, y), JOINT_RADIUS) or point_in_circle(END_EFFECTOR, (x, y), JOINT_RADIUS)
+        )
+        
+        COLOR = '#ff0000' if COLLIDING else '#000000'
+        
+        OBSTACLE_RECTANGLE = PTCHS.Polygon(OBSTACLE_CORNERS, closed = True, edgecolor = COLOR, color = COLOR, fill = True, alpha = 0.5)
+        
+        AXES.add_patch(OBSTACLE_RECTANGLE)
+        
+    handle_drawing_arm_robot(FIGURE, AXES, BASE, JOINT, END_EFFECTOR, '#00ff00', line_color = '#0000ff')
+    
+    PLT.title(f'Arm robot collision test (Iteration # {iteration})')
+    PLT.show(block = False)
+    PLT.pause(1)
+    PLT.close(FIGURE)
 
-    for obstacle in obstacles:
-        obstacle_rect = create_rectangle(obstacle["center"][0], obstacle["center"][1],
-                                         obstacle["width"], obstacle["height"], obstacle["orientation"])
-        # Check if the robot rectangle intersects the obstacle
-        if robot.intersects(obstacle_rect):
-            return True
+def parse_arguments():
+    ARG_PARSER = ARGPRS.ArgumentParser(description = 'Collision checking.')
+    
+    ARG_PARSER.add_argument('--robot', type = str, choices = ['arm', 'freeBody'], required = True, help = 'Type of robot (arm OR freeBody)')
+    ARG_PARSER.add_argument('--map', type = str, required = True, help = 'Filename containg environment.')
+    
+    return ARG_PARSER.parse_args()
 
-    return False  # No collisions detected
-
-# Function to visualize the environment and the robot
-def visualize_environment(environment, robot_pose, colliding_obstacles):
-    fig, ax = plt.subplots()
-
-    # Plot obstacles
-    for obstacle in environment["obstacles"]:
-        color = 'green' if obstacle not in colliding_obstacles else 'red'
-        rect = patches.Rectangle((obstacle['center'][0] - obstacle['width'] / 2, 
-                                  obstacle['center'][1] - obstacle['height'] / 2),
-                                  obstacle['width'], obstacle['height'],
-                                  angle=np.degrees(obstacle['orientation']),
-                                  edgecolor=color, facecolor='none', lw=2)
-        ax.add_patch(rect)
-
-    # Plot the robot (freeBody as a rectangle)
-    robot = patches.Rectangle((robot_pose[0] - 0.25, robot_pose[1] - 0.15), 0.5, 0.3,
-                              angle=np.degrees(robot_pose[2]), edgecolor='blue', facecolor='none', lw=2)
-    ax.add_patch(robot)
-
-    ax.set_xlim(0, 20)
-    ax.set_ylim(0, 20)
-    plt.show()
-
-# Main function
 def main():
-    parser = argparse.ArgumentParser(description="Collision Checking")
-    parser.add_argument('--robot', type=str, required=True, choices=['arm', 'freeBody'],
-                        help="Type of robot: 'arm' or 'freeBody'")
-    parser.add_argument('--map', type=str, required=True,
-                        help="Path to the map file")
-    args = parser.parse_args()
+    ARGS = parse_arguments()
+    
+    ENVIRONMENT = scene_from_file(ARGS.map)
+    
+    if ARGS.robot == 'arm':
+        for i in range(10):
+            theta_1 = RANDOM.uniform(0.01746, 2 * NP.pi)
+            theta_2 = RANDOM.uniform(0.01746, 2 * NP.pi)
+            RANDOM_CONFIGURATION = (theta_1, theta_2)
+            visualize_scene_arm_robot(environment = ENVIRONMENT, configuration = RANDOM_CONFIGURATION, iteration = (i + 1))
+    elif ARGS.robot == 'freeBody':
+        for i in range(10):
+            x = RANDOM.uniform(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
+            y = RANDOM.uniform(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
+            theta = RANDOM.uniform(0.01746, 2 * NP.pi)
+            RANDOM_CONFIGURATION = (x, y, theta)
+            visualize_scene_free_body_robot(environment = ENVIRONMENT, configuration = RANDOM_CONFIGURATION, iteration = (i + 1))
 
-    # Load the environment
-    environment = load_map(args.map)
-
-    for _ in range(10):  # Spawn robot for 10 seconds (10 poses)
-        robot_pose = generate_random_pose()
-
-        # Check for collisions
-        colliding_obstacles = []
-        if check_collision(robot_pose, environment["obstacles"]):
-            colliding_obstacles = [obstacle for obstacle in environment["obstacles"] if check_collision(robot_pose, [obstacle])]
-
-        # Visualize environment and robot
-        visualize_environment(environment, robot_pose, colliding_obstacles)
-        
-        time.sleep(1)  # Wait 1 second before spawning the robot again
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
