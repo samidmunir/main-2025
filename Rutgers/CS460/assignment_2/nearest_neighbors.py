@@ -373,9 +373,40 @@ from utils import (
     ENVIRONMENT_HEIGHT_MAX,
     ARM_ROBOT_LINK_1_LENGTH,
     ARM_ROBOT_LINK_2_LENGTH,
+    JOINT_RADIUS,
+    BASE,
     FREE_BODY_ROBOT_WIDTH,
     FREE_BODY_ROBOT_HEIGHT
 )
+
+def get_arm_robot_forward_kinematics(configuration: tuple) -> tuple:
+    theta_1, theta_2 = configuration
+    
+    JOINT_X = ARM_ROBOT_LINK_1_LENGTH * NP.cos(theta_1)
+    JOINT_Y = ARM_ROBOT_LINK_1_LENGTH * NP.sin(theta_1)
+    JOINT = (JOINT_X, JOINT_Y)
+    
+    END_EFFECTOR_X = JOINT_X + ARM_ROBOT_LINK_2_LENGTH * NP.cos(theta_1 + theta_2)
+    END_EFFECTOR_Y = JOINT_Y + ARM_ROBOT_LINK_2_LENGTH * NP.sin(theta_1 + theta_2)
+    END_EFFECTOR = (END_EFFECTOR_X, END_EFFECTOR_Y)
+    
+    return (BASE, JOINT, END_EFFECTOR)
+
+def load_sample_arm_robot_configurations(filename: str) -> list:
+    print(f'load_sample_arm_robot_configurations({filename}) called...')
+    
+    CONFIGURATIONS = []
+    
+    with open(filename, 'r') as FILE:
+        LINES = FILE.readlines()
+        for LINE in LINES:
+            VALUES = LINE.strip().split()
+            THETA_1, THETA_2 = float(VALUES[0]), float(VALUES[1])
+            BASE, JOINT, END_EFFECTOR = get_arm_robot_forward_kinematics(configuration = (THETA_1, THETA_2))
+            CONFIGURATION = (THETA_1, THETA_2, BASE, JOINT, END_EFFECTOR)
+            CONFIGURATIONS.append(CONFIGURATION)
+    
+    return CONFIGURATIONS
 
 def parse_arguments():
     ARG_PARSER = ARGPRS.ArgumentParser(description = 'Nearest neighbors with linear search approach.')
