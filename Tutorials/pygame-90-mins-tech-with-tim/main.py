@@ -12,8 +12,8 @@ BULLET_FIRE_SOUND = pygame.mixer.Sound(os.path.join('assets', 'Gun+Silencer.mp3'
 pygame.display.set_caption("Space Invaders")
 FPS = 60
 VELOCITY = 5
-BULLET_VELOCITY = 10
-MAX_BULLETS = 10
+BULLET_VELOCITY = 30
+MAX_BULLETS = 5
 
 # New USEREVENTS for bullet collision detection.
 YELLOW_HIT = pygame.USEREVENT + 1

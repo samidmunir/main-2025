@@ -14,12 +14,12 @@ from component_1 import (
     OBSTACLE_MIN_SIZE,
     OBSTACLE_MAX_SIZE
 )
-from nearest_neighbors import (
+from nearest_neighbors_v2 import (
     get_k_nearest_freeBody_robot_configurations,
     get_k_nearest_arm_robot_configurations,
     get_arm_robot_joint_positions
 )
-from collision_checking import (
+from collision_checking_v2 import (
     FREE_BODY_ROBOT_WIDTH,
     FREE_BODY_ROBOT_HEIGHT,
     is_colliding,
@@ -165,6 +165,63 @@ def generate_freeBody_robot_sample_configurations(number_of_samples: int, start:
     SAMPLES = SAMPLES + [goal]
     
     return SAMPLES
+
+def visualize_freeBody_PRM(prm: dict, environment: list) -> None:
+    FIGURE, AXES = PLT.subplots()
+    
+    for OBSTACLE in environment:
+        x, y, width, height, theta = OBSTACLE
+        OBSTACLE_CORNERS = get_polygon_corners(center = (x, y), width = width, height = height, theta = theta)
+        
+        OBSTACLE_RECTANGLE = PTCHS.Polygon(OBSTACLE_CORNERS, closed = True, edgecolor = '#ff0000', color = '#ff0000', fill = True, alpha = 0.5)
+        
+        AXES.add_patch(OBSTACLE_RECTANGLE)
+    
+    for NODE, NEIGHBORS in prm.items():
+        AXES.plot(NODE[0], NODE[1], 'bo', markersize = 2.5)
+    
+        for NEIGHBOR in NEIGHBORS:
+                x1, y1 = NODE[:2]
+                x2, y2 = NEIGHBOR[0][0], NEIGHBOR[0][1]
+                AXES.plot([x1, x2], [y1, y2], 'k-', linewidth = 0.5, alpha = 0.5)
+    
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
+    AXES.set_ylim(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
+    
+    PLT.title('Free Body Robot PRM')
+    
+    PLT.show()
+    
+def visualize_path(path: list, prm_graph: dict, environment: list):
+    fig, ax = PLT.subplots()
+
+    # Plot obstacles
+    for obstacle in environment:
+        x, y, width, height, theta = obstacle
+        obstacle_corners = get_polygon_corners((x, y), theta, width, height)
+        obstacle_patch = PTCHS.Polygon(obstacle_corners, closed=True, color='gray', alpha=0.5)
+        ax.add_patch(obstacle_patch)
+
+    # Plot PRM graph: Nodes and edges
+    for node, neighbors in prm_graph.items():
+        ax.plot(node[0], node[1], 'bo', markersize=3)  # Nodes as blue circles
+        for neighbor in neighbors:
+            neighbor = neighbor[0]  # Ensure correct unpacking
+            ax.plot([node[0], neighbor[0]], [node[1], neighbor[1]], 'k-', linewidth=0.5, alpha=0.6)
+
+    # Plot the solution path
+    for i in range(len(path) - 1):
+        x1, y1 = path[i][:2]  # Unpack (x, y) from each path node
+        x2, y2 = path[i + 1][:2]
+        ax.plot([x1, x2], [y1, y2], 'r-', linewidth=2.0)  # Path in red
+
+    # Set plot limits and aspect ratio
+    ax.set_aspect('equal')
+    ax.set_xlim(-10, 10)
+    ax.set_ylim(-10, 10)
+    PLT.title('PRM Solution Path Visualization')
+    PLT.show()
     
 def scene_from_file(filename: str) -> list:
     print(f'\nscene_from_file({filename}) called...')
@@ -206,8 +263,10 @@ def main():
     environment = scene_from_file(args.map)
     samples = generate_freeBody_robot_sample_configurations(NUMBER_OF_SAMPLES, tuple(args.start), tuple(args.goal))
     prm = build_prm(args.robot, samples, environment)
+    visualize_freeBody_PRM(prm, environment)
     path = a_star_search(prm, tuple(args.start), tuple(args.goal))
     if path:
+        visualize_path(path, prm, environment)
         animate_freeBody_robot(path, environment)
 
 if __name__ == '__main__':

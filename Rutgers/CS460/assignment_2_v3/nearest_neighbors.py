@@ -6,8 +6,6 @@
 
 # IMPORTS
 import argparse as ARGPRS
-import math as MATH
-import numpy as NP
 
 from utils import (
     load_sample_arm_robot_configurations,

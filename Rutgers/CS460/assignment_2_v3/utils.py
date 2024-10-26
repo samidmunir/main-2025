@@ -43,6 +43,7 @@ OBSTACLE_MAX_SIZE = 2.0
 
 ARM_ROBOT_LINK_1_LENGTH = 2.0
 ARM_ROBOT_LINK_2_LENGTH = 1.5
+JOINT_RADIUS = 0.05
 FREE_BODY_ROBOT_WIDTH = 0.5
 FREE_BODY_ROBOT_HEIGHT = 0.3
 
@@ -154,12 +155,15 @@ def handle_arm_robot_visualization(figure, axes, configuration: tuple, joint_col
     
     THETA_1, THETA_2, BASE, JOINT, END_EFFECTOR = configuration
     
-    axes.plot([BASE[0], JOINT[0]], [BASE[1], JOINT[1]], marker = 'o', color = line_color, linewidth = 1.0)
-    axes.plot([JOINT[0], END_EFFECTOR[0]], [JOINT[1], END_EFFECTOR[1]], marker = 'o', color = line_color, linewidth = 1.0)
-    
-    axes.plot(BASE[0], BASE[1], marker = 'o', color = joint_color, label = 'Base')
-    axes.plot(JOINT[0], JOINT[1], marker = 'o', color = joint_color, label = 'Joint')
-    axes.plot(END_EFFECTOR[0], END_EFFECTOR[1], marker = 'o', color = joint_color, label = 'End-effector')
+    # Line from base to joint1
+    axes.plot([BASE[0], JOINT[0]], [BASE[1], JOINT[1]], marker='o', color=f'{line_color}', label='First Arm Link')
+    # Line from joint1 to end-effector
+    axes.plot([JOINT[0], END_EFFECTOR[0]], [JOINT[1], END_EFFECTOR[1]], marker='o', color=f'{line_color}', label='Second Arm Link')
+
+    # Mark the base, joint1, and end-effector
+    axes.plot(BASE[0], BASE[1], marker='o', ms=1.5, color='#000000', label='Base Joint')
+    axes.plot(JOINT[0], JOINT[1], marker='o', ms=1.5, color=f'{joint_color}', label='Joint 1')
+    axes.plot(END_EFFECTOR[0], END_EFFECTOR[1], marker='o', ms=1.5, color=f'{joint_color}', label='End Effector')
 
 """
     function visualize_knn_scene_arm_robot(configurations: list) -> None:
@@ -279,3 +283,6 @@ def visualize_knn_scene_free_body_robot(configurations: list, k_nearest_configur
     PLT.title('Free-body robot configurations')
     
     PLT.show()
+    
+
+    PLT.close(FIGURE)

@@ -15,7 +15,7 @@ from component_1 import (
     OBSTACLE_MAX_SIZE
 )
 
-from nearest_neighbors import (
+from nearest_neighbors_v2 import (
     get_k_nearest_freeBody_robot_configurations,
     get_k_nearest_arm_robot_configurations,
     get_arm_robot_joint_positions,
@@ -23,7 +23,7 @@ from nearest_neighbors import (
     ARM_ROBOT_LINK_2_LENGTH
 )
 
-from collision_checking import (
+from collision_checking_v2 import (
     FREE_BODY_ROBOT_WIDTH,
     FREE_BODY_ROBOT_HEIGHT,
     JOINT_RADIUS,

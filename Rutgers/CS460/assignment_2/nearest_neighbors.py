@@ -241,7 +241,6 @@ def visualize_arm_robot(config, ax, link1_color='gray', link2_color='gray', base
 #         # Use link1_color for the rectangle color in freeBody visualization
 #         visualize_freebody_robot(config, ax, rectangle_color=link1_color)
 
-
 # # Function to visualize all configurations on the same plot
 # def visualize_configs(target, configs, nearest_neighbors, robot_type):
 #     fig, ax = plt.subplots()
@@ -312,7 +311,6 @@ def visualize_configs(target, configs, nearest_neighbors, robot_type):
 
     ax.set_aspect('equal')
     plt.show()
-
 
 # Argument parsing
 def parse_args():

@@ -267,7 +267,7 @@ def main():
             theta_2 = RANDOM.uniform(0.0, 2 * NP.pi)
             RAND_CONFIG = (theta_1, theta_2)
             visualize_scene_arm_robot(environment = ENVIRONMENT, config = RAND_CONFIG, iteration_num = (i + 1))
-            # TIME.sleep(1)
+            TIME.sleep(1)
     elif ARGS.robot == 'freeBody':
         for i in range(10):
             x = RANDOM.uniform(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
@@ -275,7 +275,7 @@ def main():
             theta = RANDOM.uniform(0.0, 2 * NP.pi)
             RAND_CONFIG = (x, y, theta)
             visualize_scene_freeBody_robot(environment = ENVIRONMENT, config = RAND_CONFIG, iteration_num = (i + 1))
-            # TIME.sleep(1)
+            TIME.sleep(1)
 
 if __name__ == '__main__':
     main()

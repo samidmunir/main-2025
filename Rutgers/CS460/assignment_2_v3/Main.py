@@ -19,10 +19,10 @@
     3. Collision checking
         - collision_checking.py: *** COMPLETE ***
         - test scripts:
-            > python3 collision_checking.py --robot arm --map environment_2_15.txt
-            > python3 collision_checking.py --robot arm --map environment_5_30.txt
-            > python3 collision_checking.py --robot freeBody --map environment_2_15.txt
-            > python3 collision_checking.py --robot freeBody --map environment_5_30.txt
+            > python3 collision_checking.py --robot arm --map environment_2_20.txt
+            > python3 collision_checking.py --robot arm --map environment_5_50.txt
+            > python3 collision_checking.py --robot freeBody --map environment_2_20.txt
+            > python3 collision_checking.py --robot freeBody --map environment_5_50.txt
     
     4. PRM - Probabalistic road map
         - prm.py
