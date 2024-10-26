@@ -1,3 +1,4 @@
+"""
 # import argparse
 # import numpy as NP
 
@@ -352,6 +353,47 @@ def main():
 
     # Visualize the target, nearest neighbors, and the rest of the configurations
     visualize_configs(target, configs, nearest_neighbors, args.robot)
+
+if __name__ == '__main__':
+    main()
+"""
+
+#################################################
+
+import argparse as ARGPRS
+import matplotlib.pyplot as PLT
+import matplotlib.patches as PTCHS
+import numpy as NP
+import random as RANDOM
+
+from utils import (
+    ENVIRONMENT_WIDTH_MIN,
+    ENVIRONMENT_WIDTH_MAX,
+    ENVIRONMENT_HEIGHT_MIN,
+    ENVIRONMENT_HEIGHT_MAX,
+    ARM_ROBOT_LINK_1_LENGTH,
+    ARM_ROBOT_LINK_2_LENGTH,
+    FREE_BODY_ROBOT_WIDTH,
+    FREE_BODY_ROBOT_HEIGHT
+)
+
+def parse_arguments():
+    ARG_PARSER = ARGPRS.ArgumentParser(description = 'Nearest neighbors with linear search approach.')
+    
+    ARG_PARSER.add_argument('--robot', type = str, choices = ['arm', 'freeBody'], required = True, help = 'Type of robot (arm OR freeBody).')
+    ARG_PARSER.add_argument('--target', type = float, nargs = '+', required = True, help = 'Target configuration of the robot. (N = 2 for arm, N = 3 for freeBody)')
+    ARG_PARSER.add_argument('-k', type = int, required = True, default = 3, help = 'Number of nearest neighbors to consider.')
+    ARG_PARSER.add_argument('--configs', type = str, required = True, help = 'Filename containing list of random arm/freeBody robot configurations.')
+    
+    return ARG_PARSER.parse_args()
+
+def main():
+    ARGS = parse_arguments()
+    
+    if ARGS.robot == 'arm':
+        print('*** Not yet supported. ***')
+    elif ARGS.robot == 'freeBody':
+        print('*** Not yet supported. ***')
 
 if __name__ == '__main__':
     main()

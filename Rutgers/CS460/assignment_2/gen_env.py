@@ -10,12 +10,7 @@ from utils import (
     ENVIRONMENT_HEIGHT_MIN,
     ENVIRONMENT_HEIGHT_MAX,
     OBSTACLE_MIN_SIZE,
-    OBSTACLE_MAX_SIZE,
-    ARM_ROBOT_LINK_1_LENGTH,
-    ARM_ROBOT_LINK_2_LENGTH,
-    JOINT_RADIUS,
-    FREE_BODY_ROBOT_WIDTH,
-    FREE_BODY_ROBOT_HEIGHT
+    OBSTACLE_MAX_SIZE
 )
 
 def generate_environment(number_of_obstacles: int) -> list:
