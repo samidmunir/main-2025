@@ -379,6 +379,56 @@ from utils import (
     FREE_BODY_ROBOT_HEIGHT
 )
 
+def handle_drawing_arm_robot(figure, axes, configuration: tuple, color: str) -> None:
+    THETA_1, THETA_2, BASE, JOINT, END_EFFECTOR = configuration
+    
+    axes.plot(BASE[0], BASE[1], marker = 'o', markersize = 0.75, color = color)
+    axes.plot(JOINT[0], JOINT[1], marker = 'o', markersize = 0.75, color = color)
+    axes.plot(END_EFFECTOR[0], END_EFFECTOR[1], markersize = 0.75, marker = 'o', color = color)
+    
+    axes.plot([BASE[0], JOINT[0]], [BASE[1], JOINT[1]], marker = 'o', color = color, linewidth = 1.0)
+    axes.plot([JOINT[0], END_EFFECTOR[0]], [JOINT[1], END_EFFECTOR[1]], marker = 'o', color = color, linewidth = 1.0)
+
+def visualize_scene_arm_robot(configurations: list, k_nearest_configurations: list, target_configuration: tuple) -> None:
+    FIGURE, AXES = PLT.subplots()
+    AXES.set_aspect('equal')
+    AXES.set_xlim(ENVIRONMENT_WIDTH_MIN, ENVIRONMENT_WIDTH_MAX)
+    AXES.set_ylim(ENVIRONMENT_HEIGHT_MIN, ENVIRONMENT_HEIGHT_MAX)
+    
+    for CONFIGURATION in configurations:
+        handle_drawing_arm_robot(figure = FIGURE, axes = AXES, configuration = CONFIGURATION, color = '#000000')
+        
+    for CONFIGURATION in k_nearest_configurations:
+        handle_drawing_arm_robot(figure = FIGURE, axes = AXES, configuration = CONFIGURATION[0], color = '#00ffff')
+        
+    TARGET_BASE, TARGET_JOINT, TARGET_END_EFFECTOR = get_arm_robot_forward_kinematics(configuration = (target_configuration[0], target_configuration[1]))
+    TARGET_CONFIGURATION = (target_configuration[0], target_configuration[1], TARGET_BASE, TARGET_JOINT, TARGET_END_EFFECTOR)
+    handle_drawing_arm_robot(figure = FIGURE, axes = AXES, configuration = TARGET_CONFIGURATION, color = '#00ff00')
+    
+    PLT.title('Arm robot configurations')
+    PLT.show()
+
+def get_euclidean_distance(point: tuple, target_point: tuple) -> float:
+    EUCLIDEAN_DISTANCE = NP.sqrt((point[0] - target_point[0]) ** 2 + (point[1] - target_point[1]) ** 2)
+    
+    return EUCLIDEAN_DISTANCE
+
+def get_k_nearest_arm_robot_configurations(configurations: list, target_configuration: tuple, k: int) -> list:
+    CONFIGURATION_DISTANCES = []
+    
+    _, _, TARGET_END_EFFECTOR = get_arm_robot_forward_kinematics(configuration = (target_configuration[0], target_configuration[1]))
+    
+    for CONFIGURATION in configurations:
+        END_EFFECTOR = CONFIGURATION[4]
+        EUCLIDEAN_DISTANCE = get_euclidean_distance(point = END_EFFECTOR, target_point = TARGET_END_EFFECTOR)
+        CONFIGURATION_DISTANCES.append((CONFIGURATION, EUCLIDEAN_DISTANCE))
+    
+    CONFIGURATION_DISTANCES.sort(key = lambda EUC_DIST: EUC_DIST[1])
+    
+    K_NEAREST_CONFIGURATIONS = CONFIGURATION_DISTANCES[:k]
+    
+    return K_NEAREST_CONFIGURATIONS
+
 def get_arm_robot_forward_kinematics(configuration: tuple) -> tuple:
     theta_1, theta_2 = configuration
     
@@ -422,7 +472,9 @@ def main():
     ARGS = parse_arguments()
     
     if ARGS.robot == 'arm':
-        print('*** Not yet supported. ***')
+        RANDOM_CONFIGURATIONS = load_sample_arm_robot_configurations(filename = ARGS.configs)
+        K_NEAREST_CONFIGURATIONS = get_k_nearest_arm_robot_configurations(configurations = RANDOM_CONFIGURATIONS, target_configuration = ARGS.target, k = ARGS.k)
+        visualize_scene_arm_robot(configurations = RANDOM_CONFIGURATIONS, k_nearest_configurations = K_NEAREST_CONFIGURATIONS, target_configuration = ARGS.target)
     elif ARGS.robot == 'freeBody':
         print('*** Not yet supported. ***')
 
