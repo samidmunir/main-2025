@@ -1,0 +1,110 @@
+﻿This is a simple project intended to help you understand basic error checking through the use of checksums. This will be worth 5 points on your final grade  In this project, you must modify the code from the previos project. The client code is the same as the client from the last project.
+
+As before, the goal of the server is to get any string sent to it, and switch any letters from lower case to capital and any capital letters to lowercase. Lastly, it should then close gracefully when the client is done sending strings. 
+
+The key difference is that this time there will be checksuming. This means that you must compute the internet checksum,
+the inverse of the 16 bit 1's compliment sum, and prepend it to each message sent. The definition of the internet checksum
+is discussed in class, in the reading for HW1 and in the textbook. Note that when computing the checksum, two zero bytes should be attached to the beggining of the message. As discussed in the homeworks and class, 
+this makes the sum of the entire message the same for every message.
+
+Whenever a message is sent, the two byte checksum should be attached to the beggining like this:
+
+message = b'blahblah'
+checksum(b'\0\0blahblah') == b'xV'
+s.sendall(b'xVblahblah')
+
+Where, in this case xV is the proper checksum. Whenever a message is recieved, the checksum should also be computed.
+Instead of responding with the case inversed message, simply respond ERROR if the checksum is incorrect. 
+
+This means that under normal operation you will need to compute the sum twice, once to check if the input checksum is correct and another time to compute the outgoing checksum.
+
+When responding ERROR, leave the checksum field as zero to distinguish it from the correct response to b'error'
+Note that not all checksums will be ASCII charecters and they may apear strange when veiwed with a file editor or printed on the terminal.
+To help with this I have included a very simple python program called "reader.py" that will report the exact contents of a file given as an argument. Note that this program does not
+divide the file into lines to avoid hiding the newline charecters which can affect the checksum
+
+The remainder of the instructions are identical to project 0 (other than file names), copied here for your convenience.
+
+A sample output and input file has also been provided.
+As with all projects you may work in groups of two.
+
+MAKE SURE YOUR CODE WORKS WITH THE EXAMPLE FILES
+
+
+
+
+How we will test your programs
+------------------------------
+
+
+As part of your submission, you will turn in one program:Server.py and one README file (more on this below).
+ We will be running the two programs on the ilab machines with Python 3 (ideally 3.10). Information about how to use and access the machines will be provided in lecture.
+
+
+Please do not assume that all programs will run on the same machine or that all
+connections are made to the local host.  We reserve the right to test your
+programs with local and remote socket connections, for example with Client.py,
+And Server.py each running on a different machine. You are welcome to
+simplify the initial development and debugging of your project, and get off the
+ground by running all programs on one machine first. However, you must
+eventually ensure that the programs can work across multiple machines.
+Please note that the ilab machines are no longer addressable from the outside, so you 
+must use two different ilab machines for testing. 
+
+The programs must work with the following command lines:
+
+
+python Server.py PORT
+python Client.py SERVERADDRESS PORT
+
+
+An example of this would be:
+python Server.py 5444
+python Client.py vi.cs.rutgers.edu 5444
+
+
+By default the client reads from a file called source_strings.txt and writes to a file called results.txt
+
+
+Academic Dishonesty:
+
+Code coppied from anywhere will be dealt with according to the Rutgers Academic Dishonesty policy.
+If the copied code's source is referenced, the maximum penalty will be 50% off the given assingment, 
+and as little as nothing depending on how much was copied and whether you had the license.
+
+AI use is not permitted on this assignment.
+
+If the code is not cited, and makes up a substantial portion of the project, the MINIMUM penalty will be
+a zero on the assignment.
+
+
+README file
+-----------
+
+
+In addition to your programs, you must also submit a README file (named README.txt) with clearly
+delineated sections for the following.
+
+
+0. Please write down the full names and netids of both your team members.
+1. Are there known issues or functions that aren't working currently in your
+   attached code? If so, explain. (note that you will get half credit for any reasonably sized bug that is fully explained in the readme)
+2. Collaboration: Who did you collaborate with on this project? What resources and refer-
+ences did you consult? Please also specify on what aspect of the project you collaborated or
+consulted.
+3. What problems did you face developing code for this project? Around how long did you spend on this project (This helps me decide what I need to explain more clearly for the next projects)
+
+
+Submission
+----------
+
+
+Turn in your project on Canvas assignments. Only one team member should submit.
+To be sure you both get a grade the other team member can submit README only with a note that the partner submitted.
+ONLY ONE TEAM MEMBER SHOULD SUBMIT CODE
+Please submit your final project as a single zip file with the exact following files inside it
+ (the readme should be a txt file)(Note caps in file and folder names).
+
+Project_1
+   -- Server.py
+   -- README.md
