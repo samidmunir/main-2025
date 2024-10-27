@@ -1,4 +1,5 @@
 # IMPORTS
+import math as MATH
 import numpy as NP
 
 ENVIRONMENT_WIDTH_MIN = -10.0
@@ -80,4 +81,80 @@ def is_colliding_link(link_start, link_end, obstacle_corners):
         corner2 = obstacle_corners[(i + 1) % len(obstacle_corners)]
         if is_line_intersecting(link_start, link_end, corner1, corner2):
             return True
+    return False
+
+def point_in_rotated_rectangle(px, py, x, y, width, height, theta, epsilon = 0.02):
+    # Step 1: Translate point to the rectangle's local coordinate system.
+    translated_x = px - x
+    translated_y = py - y
+    
+    # Step 2: Rotate the point by -theta to align with the rectangle's axes.
+    cos_theta = MATH.cos(-theta)
+    sin_theta = MATH.sin(-theta)
+    local_x = translated_x * cos_theta - translated_y * sin_theta
+    local_y = translated_x * sin_theta + translated_y * cos_theta
+    
+    # Step 3: Check if the point lies within the rectangle's bounds.
+    half_width = width / 2.0
+    half_height = height / 2.0
+    
+    if -half_width - epsilon <= local_x <= half_width + epsilon and -half_height - epsilon <= local_y <= half_height + epsilon:
+        return True
+    else:
+        return False
+    
+def rotate_point(px, py, cx, cy, angle):
+    """Rotate point (px, py) around center (cx, cy) by angle (in radians)."""
+    s, c = NP.sin(angle), NP.cos(angle)
+    # Translate point to origin
+    px, py = px - cx, py - cy
+    # Rotate point
+    x_new = px * c - py * s
+    y_new = px * s + py * c
+    # Translate point back
+    return x_new + cx, y_new + cy
+
+def is_point_in_rectangle(px, py, cx, cy, width, height, angle):
+    """Check if a point is inside a rotated rectangle using SAT."""
+    # Define the rectangle's four corners (unrotated)
+    w, h = width / 2, height / 2
+    corners = [
+        (cx - w, cy - h), (cx + w, cy - h),
+        (cx + w, cy + h), (cx - w, cy + h)
+    ]
+    
+    # Rotate corners around the center of the rectangle
+    rotated_corners = [rotate_point(x, y, cx, cy, angle) for x, y in corners]
+
+    # Check if the point is inside the rectangle using cross products (SAT)
+    for i in range(4):
+        p1 = rotated_corners[i]
+        p2 = rotated_corners[(i + 1) % 4]
+        
+        # Calculate edge vector and perpendicular vector
+        edge = (p2[0] - p1[0], p2[1] - p1[1])
+        perp = (-edge[1], edge[0])  # Perpendicular vector
+        
+        # Project point and rectangle corners onto the perpendicular vector
+        proj_point = NP.dot(perp, (px - p1[0], py - p1[1]))
+        proj_rect = [NP.dot(perp, (x - p1[0], y - p1[1])) for x, y in rotated_corners]
+        
+        # If the point projection is outside the rectangle projections, return False
+        if proj_point < min(proj_rect) or proj_point > max(proj_rect):
+            return False
+    return True
+
+def sample_line_segment(p1, p2, step_size=0.1):
+    """Sample points along a line segment between two points."""
+    x1, y1 = p1
+    x2, y2 = p2
+    dist = NP.hypot(x2 - x1, y2 - y1)
+    num_samples = int(dist / step_size)
+    return [(x1 + i * (x2 - x1) / num_samples, y1 + i * (y2 - y1) / num_samples) for i in range(num_samples + 1)]
+
+def check_line_intersects_obstacle(p1, p2, cx, cy, width, height, angle, step_size=0.1):
+    """Check if a line segment intersects a rotated rectangle obstacle."""
+    for point in sample_line_segment(p1, p2, step_size):
+        if is_point_in_rectangle(*point, cx, cy, width, height, angle):
+            return True  # Intersection found
     return False
